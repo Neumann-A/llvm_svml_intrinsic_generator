@@ -19,5 +19,8 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 find_package(Boost REQUIRED COMPONENTS program_options)
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::program_options)
 
-
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+
+##---------------------------------------------------------------------------------------##
+add_executable(SVML_FirstTry SVML_Test.cpp)
+target_compile_options(SVML_FirstTry PRIVATE /arch:AVX2)

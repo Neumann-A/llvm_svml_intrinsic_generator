@@ -1,4 +1,13 @@
+///-------------------------------------------------------------------------------------------------
+// file:	create_clang_svml_intrinsic.cpp
+//
+// Copyright (c) 2019 Alexander Neumann.
+// MIT License see https://github.com/Neumann-A/llvm_svml_intrinsic_generator/blob/master/LICENSE
+//
+// author: Alexander
+// date: 09.04.2019
 
+///-------------------------------------------------------------------------------------------------
 #include <fstream>
 #include <iostream>
 #include <string>

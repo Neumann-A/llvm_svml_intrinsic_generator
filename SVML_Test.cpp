@@ -1,3 +1,12 @@
+///-------------------------------------------------------------------------------------------------
+// file:	SVML_Test.cpp
+//
+// Copyright (c) 2019 Alexander Neumann.
+// MIT License see https://github.com/Neumann-A/llvm_svml_intrinsic_generator/blob/master/LICENSE
+//
+// author: Alexander
+// date: 09.04.2019
+///-------------------------------------------------------------------------------------------------
 #include <immintrin.h>
 #include <array>
 #include <iostream>

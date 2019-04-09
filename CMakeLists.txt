@@ -1,3 +1,12 @@
+///-------------------------------------------------------------------------------------------------
+// file:	CMakeLists.txt
+//
+// Copyright (c) 2019 Alexander Neumann.
+// MIT License see https://github.com/Neumann-A/llvm_svml_intrinsic_generator/blob/master/LICENSE
+//
+// author: Alexander
+// date: 09.04.2019
+///-------------------------------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.9 FATAL_ERROR)
 include(GNUInstallDirs)
 

@@ -1,0 +1,344 @@
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <type_traits>
+#include <immintrin.h>
+#include <filesystem>
+#include <list>
+#include <deque>
+#include <map>
+#include <optional>
+#include <regex>
+
+#include <boost/program_options.hpp>
+
+namespace bo_opts = ::boost::program_options;
+namespace fs = ::std::filesystem;
+
+struct Opts
+{
+	fs::path vdecl;
+	fs::path svml;
+	//fs::path output;
+	//fs::path testoutput;
+} ;
+
+//Should probably be an array to run the options in a proper loop
+struct opts_string
+{
+	std::string_view vdecl;
+	std::string_view svml;
+};
+
+struct func_str_list
+{
+	std::vector<std::string> vdecl;
+	std::vector<std::string> svml;
+};
+
+constexpr const opts_string optstr{ "vdecl-list","svml-list" };
+
+
+bo_opts::options_description desc{ "Options" };
+
+void displayHelp()
+{
+	::std::cerr << "This programm will use the VDECL & SVML input files to automatically generate a header to map VS __vdecl symbols to SVML __mm intrinsics.\n";
+	::std::cerr << desc << std::endl;
+}
+
+void parseOptions(int argc, char** argv, Opts& opts)
+{
+	desc.add_options()
+		("help", "This programm will")
+		(optstr.vdecl.data(), bo_opts::value<fs::path>(&opts.vdecl)->default_value({ "vdecl_list.txt" }), "list with vdecl symbols to map")
+		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics.txt" }), "list with all svml intrinsics");
+
+	bo_opts::variables_map vm;
+	bo_opts::store(bo_opts::parse_command_line(argc, argv, desc), vm);
+	bo_opts::notify(vm);
+	if (vm.count("help") > 0)
+	{
+		displayHelp();
+	}
+
+	//const auto val = vm[optstr.vdecl.data()];
+
+	//Opts opts{ vm[optstr.vdecl.data()].as<fs::path>(), vm[optstr.svml.data()].as<fs::path>() };
+
+	::std::cerr << "This programm will use the VDECL & SVML input files to automatically generate a header to map Microsofts __vdecl symbols to SVML __mm intrinsics.\n";
+	::std::cerr << "SVML Input file: " << opts.svml << '\n';
+	::std::cerr << "VDECL Input file: " << opts.svml << '\n';
+}
+
+void checkOpts(const Opts& opts)
+{
+	if (!std::filesystem::exists(opts.vdecl))
+	{
+		::std::cerr << "VDECL Input does not exist! Filepath: " << opts.vdecl << '\n';
+		::std::abort();
+	}
+
+	if (!std::filesystem::exists(opts.svml))
+	{
+		::std::cerr << "SVML Input does not exist! Filepath: " << opts.svml << '\n';
+		::std::abort();
+	}
+};
+
+func_str_list loadLists(const Opts& opts)
+{
+	func_str_list lines;
+	{
+		std::ifstream vdeclfile(opts.vdecl);
+		std::ifstream svmlfile(opts.svml);	
+
+		for (std::string line; std::getline(vdeclfile, line);)
+		{
+			lines.vdecl.push_back(line);
+		}
+		for (std::string line; std::getline(svmlfile, line);)
+		{
+			lines.svml.push_back(line);
+		}
+	}
+	return lines;
+}
+
+enum class intrin_type_info {
+	m128i, m256i, m512i, m128, m256, m512, m128d, m256d, m512d, pm128i, pm256i, pm512i, pm128, pm256, pm512, pm128d, pm256d, pm512d, mask8, mask16, m128func, m128dfunc, undefined
+};
+
+std::map<intrin_type_info, std::string_view> intrin_param_map_info{
+	{intrin_type_info::m128i, "__m128i"},
+	{intrin_type_info::m256i, "__m256i"},
+	{intrin_type_info::m512i, "__m512i"},
+	{intrin_type_info::m128, "__m128"},
+	{intrin_type_info::m256, "__m256"},
+	{intrin_type_info::m512, "__m512"},
+	{intrin_type_info::m128d, "__m128d"},
+	{intrin_type_info::m256d, "__m256d"},
+	{intrin_type_info::m512d, "__m512d"},
+	{intrin_type_info::pm128i, "__m128i*"},
+	{intrin_type_info::pm256i, "__m256i*"},
+	{intrin_type_info::pm512i, "__m512i*"},
+	{intrin_type_info::pm128, "__m128*"},
+	{intrin_type_info::pm256, "__m256*"},
+	{intrin_type_info::pm512, "__m512*"},
+	{intrin_type_info::pm128d, "__m128d*"},
+	{intrin_type_info::pm256d, "__m256d*"},
+	{intrin_type_info::pm512d, "__m512d*"},
+	{intrin_type_info::mask8, "__mmask8"},
+	{intrin_type_info::mask16, "__mmask16"},
+};
+
+std::map<intrin_type_info, std::string_view> vdecl_type_map{
+	{intrin_type_info::m128i, "8_16"},
+	{intrin_type_info::m256i, "8_32"},
+	{intrin_type_info::m512i, "8_64"},
+	{intrin_type_info::m128i, "16_8"},
+	{intrin_type_info::m256i, "16_16"},
+	{intrin_type_info::m512i, "16_32"},
+	{intrin_type_info::m128i, "32_4"},
+	{intrin_type_info::m256i, "32_8"},
+	{intrin_type_info::m512i, "32_16"},
+	{intrin_type_info::m128i, "64_2"},
+	{intrin_type_info::m256i, "64_4"},
+	{intrin_type_info::m512i, "64_8"},
+	{intrin_type_info::m128, "f4"},
+	{intrin_type_info::m256, "f8"},
+	{intrin_type_info::m512, "f16"},
+	{intrin_type_info::m128d, "2"},
+	{intrin_type_info::m256d, "4"},
+	{intrin_type_info::m512d, "8"},
+};
+
+bool is_pointer_type(intrin_type_info type)
+{
+	switch (type)
+	{
+	case intrin_type_info::pm128i:
+	case intrin_type_info::pm256i:
+	case intrin_type_info::pm512i:
+	case intrin_type_info::pm128:
+	case intrin_type_info::pm256:
+	case intrin_type_info::pm512:
+	case intrin_type_info::pm128d:
+	case intrin_type_info::pm256d:
+	case intrin_type_info::pm512d:
+		return true; 
+	default:
+		return false;
+	}
+}
+bool is_mask_type(intrin_type_info type)
+{
+	switch (type)
+	{
+	case intrin_type_info::mask8:
+	case intrin_type_info::mask16:
+		return true;
+	default:
+		return false;
+	}
+}
+
+
+std::map<intrin_type_info, std::string_view> intrin_func_prefix_info{
+	{intrin_type_info::m128i, "_m128"},
+	{intrin_type_info::m256i, "_m256"},
+	{intrin_type_info::m512i, "_m512"},
+	{intrin_type_info::m128, "_m128"},
+	{intrin_type_info::m256, "_m256"},
+	{intrin_type_info::m512, "_m512"},
+	{intrin_type_info::m128d, "_m128"},
+	{intrin_type_info::m256d, "_m256"},
+	{intrin_type_info::m512d, "_m512"}
+};
+
+std::map<intrin_type_info, std::string_view> intrin_func_suffix_info{
+	{intrin_type_info::m128i, ""},
+	{intrin_type_info::m256i, ""},
+	{intrin_type_info::m512i, ""},
+	{intrin_type_info::m128, "_ps"},
+	{intrin_type_info::m256, "_ps"},
+	{intrin_type_info::m512, "_ps"},
+	{intrin_type_info::m128d, "_pd"},
+	{intrin_type_info::m256d, "_pd"},
+	{intrin_type_info::m512d, "_pd"}
+};
+
+template<typename C>
+std::optional<intrin_type_info> from_string(const C& con, std::string_view view)
+{
+	auto res = std::find(con.begin(), con.end(), [&view](typename C::value_type & elem) {return elem.second = view; });
+	if (res != con.end())
+		return *res;
+	else
+		return std::nullopt;
+};
+
+template<typename C>
+std::string_view to_string(const C& con, intrin_type_info type)
+{
+	return con.find[type];
+}
+
+struct mm_intrinsics_info {
+	bool hasMask;
+	int NumberOfParams;
+	int NumberOfOutParams;
+	std::string FullFunctionName;
+	intrin_type_info ReturnType;
+	std::vector<intrin_type_info> ParamList;
+};
+
+struct extra_assembly_info {
+	std::vector<std::string> prelude;
+	std::vector<std::string> epilogue;
+};
+
+struct vdecl_symbol_info {
+	bool isValid{ false };
+	int ReturnElements{ 1 };
+	int InputElements{ 1 };
+	intrin_type_info ReturnType{ intrin_type_info::undefined};
+	std::string FullFunctionName{""};
+	std::string SearchFunction{""};
+};
+
+struct svml_definition_info {
+
+};
+struct svml_mapping_info{
+
+};
+
+static const std::regex vdeclanalyzeregex{ "__vdecl_([u|i][0-9]+)?([a-zA-Z]+)(1p|10)?([f]?[136]?[2468])" };
+[[nodiscard]] std::optional<vdecl_symbol_info> analyze_vdecl_line(const std::string& str)
+{
+	std::smatch m;
+	std::regex_search(str, m, vdeclanalyzeregex);
+	if (!m.empty())
+	{
+		for (auto& elems : m)
+		{
+			::std::cerr << "Match: " << elems << '\n';
+			
+		}
+		return vdecl_symbol_info{};
+	}
+	return { std::nullopt };
+}
+
+[[nodiscard]] std::optional<svml_definition_info> analyze_svml_line(const std::string& str)
+{
+	std::smatch m;
+	std::regex_search(str, m, vdeclanalyzeregex);
+	if (!m.empty())
+	{
+		for (auto& elems : m)
+		{
+			::std::cerr << "Match: " << elems << '\n';
+
+		}
+		return vdecl_symbol_info{};
+	}
+	return { std::nullopt };
+}
+
+std::vector<vdecl_symbol_info> analyze_vdecl_list(std::vector<std::string>& strlist)
+{
+	std::vector<vdecl_symbol_info> symbol_info;
+	symbol_info.reserve(strlist.size());
+	std::vector<std::string> notanalyzed;
+	for (const auto& elem : strlist)
+	{
+		auto info = analyze_vdecl_line(elem);
+		if (!info)
+		{
+			notanalyzed.push_back(elem);
+			::std::cerr << "Could not analyze line: " << elem << '\n';
+			continue;
+		}
+		symbol_info.emplace_back(std::move(*info));
+	}
+	strlist = notanalyzed;
+	symbol_info.shrink_to_fit();
+	return symbol_info;
+}
+
+std::vector<svml_mapping_info> analyzeInputLists(func_str_list& list) {
+
+	auto vdeclinfo = analyze_vdecl_list(list.vdecl);
+	return {};
+}
+
+void outputRemainingLists(func_str_list& list)
+{
+	::std::cerr << "The following __vdecl symbols have not been mapped: \n";
+	for (const auto& elem : list.vdecl)
+		::std::cerr << elem << '\n';
+	
+	::std::cerr << "The following SVML intrinsics could not be found within the __vdecl symbols: \n";
+	for (const auto& elem : list.svml)
+		::std::cerr << elem << '\n';
+}
+
+int main(int argc,  char** argv)
+{	
+	Opts opts;
+	parseOptions(argc, argv, opts);
+	checkOpts(opts);
+
+	auto list = loadLists(opts);
+
+	auto mapping_info = analyzeInputLists(list);
+
+	//outputRemainingLists(list);
+
+	return EXIT_SUCCESS;
+}

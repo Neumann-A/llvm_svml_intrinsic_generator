@@ -120,6 +120,39 @@ func_str_list loadLists(const Opts& opts)
 enum class intrin_type_info {
 	m128i, m256i, m512i, m128, m256, m512, m128d, m256d, m512d, pm128i, pm256i, pm512i, pm128, pm256, pm512, pm128d, pm256d, pm512d, mask8, mask16, m128func, m128dfunc, undefined
 };
+enum class packed_type_info {
+	pd, ps, epi8, epi16, epi32, epi64, epu8, epu16, epu32, epu64,
+};
+
+struct packed_type {
+	std::string_view name;
+	std::size_t      size;
+};
+
+std::map<packed_type_info, std::string_view> packed_type_name_map_info{
+	{packed_type_info::pd, "pd"},
+	{packed_type_info::ps, "ps"},
+	{packed_type_info::epi8, "epi8"},
+	{packed_type_info::epi16, "epi16"},
+	{packed_type_info::epi32, "epi32"},
+	{packed_type_info::epi64, "epi64"},
+	{packed_type_info::epu8, "epu8"},
+	{packed_type_info::epu16, "epu16"},
+	{packed_type_info::epu32, "epu32"},
+	{packed_type_info::epu64, "epu64"}
+};
+std::map<packed_type_info, std::size_t> packed_type_size_map_info{
+	{packed_type_info::pd, sizeof(double)},
+	{packed_type_info::ps, sizeof(float)},
+	{packed_type_info::epi8, sizeof(std::int8_t)},
+	{packed_type_info::epi16, sizeof(std::int16_t)},
+	{packed_type_info::epi32, sizeof(std::int32_t)},
+	{packed_type_info::epi64, sizeof(std::int64_t)},
+	{packed_type_info::epu8, sizeof(std::uint8_t)},
+	{packed_type_info::epu16, sizeof(std::uint16_t)},
+	{packed_type_info::epu32, sizeof(std::uint32_t)},
+	{packed_type_info::epu64, sizeof(std::uint64_t)}
+};
 
 std::map<intrin_type_info, std::string_view> intrin_param_map_info{
 	{intrin_type_info::m128i, "__m128i"},
@@ -131,15 +164,15 @@ std::map<intrin_type_info, std::string_view> intrin_param_map_info{
 	{intrin_type_info::m128d, "__m128d"},
 	{intrin_type_info::m256d, "__m256d"},
 	{intrin_type_info::m512d, "__m512d"},
-	{intrin_type_info::pm128i, "__m128i*"},
-	{intrin_type_info::pm256i, "__m256i*"},
-	{intrin_type_info::pm512i, "__m512i*"},
-	{intrin_type_info::pm128, "__m128*"},
-	{intrin_type_info::pm256, "__m256*"},
-	{intrin_type_info::pm512, "__m512*"},
-	{intrin_type_info::pm128d, "__m128d*"},
-	{intrin_type_info::pm256d, "__m256d*"},
-	{intrin_type_info::pm512d, "__m512d*"},
+	{intrin_type_info::pm128i, "__m128i *"},
+	{intrin_type_info::pm256i, "__m256i *"},
+	{intrin_type_info::pm512i, "__m512i *"},
+	{intrin_type_info::pm128, "__m128 *"},
+	{intrin_type_info::pm256, "__m256 *"},
+	{intrin_type_info::pm512, "__m512 *"},
+	{intrin_type_info::pm128d, "__m128d *"},
+	{intrin_type_info::pm256d, "__m256d *"},
+	{intrin_type_info::pm512d, "__m512d *"},
 	{intrin_type_info::mask8, "__mmask8"},
 	{intrin_type_info::mask16, "__mmask16"},
 };
@@ -197,35 +230,29 @@ bool is_mask_type(intrin_type_info type)
 
 
 std::map<intrin_type_info, std::string_view> intrin_func_prefix_info{
-	{intrin_type_info::m128i, "_m128"},
-	{intrin_type_info::m256i, "_m256"},
-	{intrin_type_info::m512i, "_m512"},
-	{intrin_type_info::m128, "_m128"},
-	{intrin_type_info::m256, "_m256"},
-	{intrin_type_info::m512, "_m512"},
-	{intrin_type_info::m128d, "_m128"},
-	{intrin_type_info::m256d, "_m256"},
-	{intrin_type_info::m512d, "_m512"}
+	{intrin_type_info::m128, "mm"},
+	{intrin_type_info::m256, "mm256"},
+	{intrin_type_info::m512, "mm512"},
 };
 
 std::map<intrin_type_info, std::string_view> intrin_func_suffix_info{
 	{intrin_type_info::m128i, ""},
 	{intrin_type_info::m256i, ""},
 	{intrin_type_info::m512i, ""},
-	{intrin_type_info::m128, "_ps"},
-	{intrin_type_info::m256, "_ps"},
-	{intrin_type_info::m512, "_ps"},
-	{intrin_type_info::m128d, "_pd"},
-	{intrin_type_info::m256d, "_pd"},
-	{intrin_type_info::m512d, "_pd"}
+	{intrin_type_info::m128, "ps"},
+	{intrin_type_info::m256, "ps"},
+	{intrin_type_info::m512, "ps"},
+	{intrin_type_info::m128d, "pd"},
+	{intrin_type_info::m256d, "pd"},
+	{intrin_type_info::m512d, "pd"}
 };
 
 template<typename C>
 std::optional<intrin_type_info> from_string(const C& con, std::string_view view)
 {
-	auto res = std::find(con.begin(), con.end(), [&view](typename C::value_type & elem) {return elem.second = view; });
+	auto res = std::find_if(con.begin(), con.end(), [&view](const typename C::value_type elem) {return elem.second == view; });
 	if (res != con.end())
-		return *res;
+		return res->first;
 	else
 		return std::nullopt;
 };
@@ -259,9 +286,32 @@ struct vdecl_symbol_info {
 	std::string SearchFunction{""};
 };
 
-struct svml_definition_info {
 
+struct svml_string_info {
+	std::string fullsignature;
+	std::string retval;
+	std::string prefix;
+	std::string mask;
+	std::string func;
+	std::string postfix;
+	std::string params;
 };
+struct svml_definition_info {
+	svml_string_info strinfo;
+	mm_intrinsics_info mminfo;
+};
+
+std::ostream& operator<<(std::ostream& os, const svml_string_info& info)
+{
+	os << "Return: " << info.retval << '\n'; 
+	os << "Prefix: " << info.prefix << '\n';
+	os << "Mask: " << (info.mask.empty() ? false : true) << '\n';
+	os << "Name: " << info.func << '\n';
+	os << "Postfix: " << info.postfix << '\n';
+	os << "Params: " << info.params << '\n';
+	return os;
+}
+
 struct svml_mapping_info{
 
 };
@@ -283,18 +333,60 @@ static const std::regex vdeclanalyzeregex{ "__vdecl_([u|i][0-9]+)?([a-zA-Z]+)(1p
 	return { std::nullopt };
 }
 
+static const std::regex svmlanalyzerregex{ "(__[^_]+) _([^_]+)_(mask)?_?([^_]+)_([^_]+) \\(([^\\(\\)]+)\\)" };
+static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4}|__mmask8|__mmask16)" };
 [[nodiscard]] std::optional<svml_definition_info> analyze_svml_line(const std::string& str)
 {
+	::std::cerr << "Analysing line: " << str << '\n';
 	std::smatch m;
-	std::regex_search(str, m, vdeclanalyzeregex);
+	std::regex_search(str, m, svmlanalyzerregex);
 	if (!m.empty())
 	{
-		for (auto& elems : m)
-		{
-			::std::cerr << "Match: " << elems << '\n';
+		svml_string_info info{ m[0],m[1],m[2],m[3],m[4],m[5],m[6] };
+		//mm_intrinsics_info{ !info.mask.empty(), };
+		//::std::cerr << info;
 
+		std::size_t pos{ 0 };
+		std::size_t lastpos{ 0 };
+		std::smatch m2;
+
+		std::vector<intrin_type_info> params;
+
+		//should probably rename this lambda to something more usefull
+		auto func_on_type_lambda = [](auto& map, auto & strtype, auto & func) {
+			auto type = from_string(map, strtype);
+			if (type) {
+				func(*type);
+			}
+			else {
+				::std::cerr << "Could not determine type for " << strtype << '\n';
+			}
+		};
+
+		auto return_type = [](auto & map, auto & strtype) {
+			auto type = from_string(map, strtype);
+			return type.value();
+		};
+
+		while(pos < info.params.size())
+		{
+			pos = info.params.find(',', lastpos);
+			auto substr = info.params.substr(lastpos, pos-1);
+			lastpos = pos+1;
+			std::regex_search(substr, m2, svmlanalyzerparams);
+			if (!m2.empty() && m2.size() > 1)
+			{
+				auto emplace_back = [&params](auto elem) {params.emplace_back(std::move(elem)); };
+				func_on_type_lambda(intrin_param_map_info, m2[1].str(), emplace_back);
+			}			
 		}
-		return vdecl_symbol_info{};
+
+		intrin_type_info returnval = return_type(intrin_param_map_info, info.retval);
+		intrin_type_info prefix = return_type(intrin_func_prefix_info, info.prefix);
+		packed_type_info postfix = return_type(packed_type_name_map_info, info.postfix);
+
+		svml_definition_info fullinfo{};
+		return fullinfo;
 	}
 	return { std::nullopt };
 }
@@ -320,9 +412,31 @@ std::vector<vdecl_symbol_info> analyze_vdecl_list(std::vector<std::string>& strl
 	return symbol_info;
 }
 
+std::vector<svml_definition_info> analyze_svml_list(std::vector<std::string>& strlist)
+{
+	std::vector<svml_definition_info> symbol_info;
+	symbol_info.reserve(strlist.size());
+	std::vector<std::string> notanalyzed;
+	for (const auto& elem : strlist)
+	{
+		auto info = analyze_svml_line(elem);
+		if (!info)
+		{
+			notanalyzed.push_back(elem);
+			::std::cerr << "Could not analyze line: " << elem << '\n';
+			continue;
+		}
+		symbol_info.emplace_back(std::move(*info));
+	}
+	strlist = notanalyzed;
+	symbol_info.shrink_to_fit();
+	return symbol_info;
+}
+
 std::vector<svml_mapping_info> analyzeInputLists(func_str_list& list) {
 
-	auto vdeclinfo = analyze_vdecl_list(list.vdecl);
+	//auto vdeclinfo = analyze_vdecl_list(list.vdecl);
+	auto svmlinfo = analyze_svml_list(list.svml);
 	return {};
 }
 

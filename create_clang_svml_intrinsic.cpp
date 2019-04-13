@@ -248,7 +248,7 @@ std::map<intrin_type_info, std::string_view> intrin_func_suffix_info{
 };
 
 template<typename C>
-std::optional<intrin_type_info> from_string(const C& con, std::string_view view)
+std::optional<typename C::value_type::first_type> from_string(const C& con, std::string_view view)
 {
 	auto res = std::find_if(con.begin(), con.end(), [&view](const typename C::value_type elem) {return elem.second == view; });
 	if (res != con.end())
@@ -258,17 +258,21 @@ std::optional<intrin_type_info> from_string(const C& con, std::string_view view)
 };
 
 template<typename C>
-std::string_view to_string(const C& con, intrin_type_info type)
+std::string_view to_string(const C& con, typename C::value_type::first_type type)
 {
 	return con.find[type];
 }
 
 struct mm_intrinsics_info {
-	bool hasMask;
-	int NumberOfParams;
-	int NumberOfOutParams;
+	bool hasMask{ false };
+	bool isInverse{ false };
+	int NumberOfParams{ 0 };
+	int NumberOfOutParams{ 1 };
 	std::string FullFunctionName;
+	std::string MathFunction;
 	intrin_type_info ReturnType;
+	intrin_type_info Prefix;
+	packed_type_info Postfix;
 	std::vector<intrin_type_info> ParamList;
 };
 
@@ -285,7 +289,6 @@ struct vdecl_symbol_info {
 	std::string FullFunctionName{""};
 	std::string SearchFunction{""};
 };
-
 
 struct svml_string_info {
 	std::string fullsignature;
@@ -333,6 +336,18 @@ static const std::regex vdeclanalyzeregex{ "__vdecl_([u|i][0-9]+)?([a-zA-Z]+)(1p
 	return { std::nullopt };
 }
 
+static const std::regex isinverseregex{"inv"};
+[[nodiscard]] bool is_inverse_func(const std::string& str)
+{
+	std::smatch m;
+	return std::regex_match(str, m, isinverseregex);
+}
+
+std::string remove_inverse(const std::string& str)
+{
+	return str.substr(0, str.size() - 3);
+}
+
 static const std::regex svmlanalyzerregex{ "(__[^_]+) _([^_]+)_(mask)?_?([^_]+)_([^_]+) \\(([^\\(\\)]+)\\)" };
 static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4}|__mmask8|__mmask16)" };
 [[nodiscard]] std::optional<svml_definition_info> analyze_svml_line(const std::string& str)
@@ -353,7 +368,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 		std::vector<intrin_type_info> params;
 
 		//should probably rename this lambda to something more usefull
-		auto func_on_type_lambda = [](auto& map, auto & strtype, auto & func) {
+		auto func_on_type_lambda = [](auto& map, const std::string& strtype, auto& func) {
 			auto type = from_string(map, strtype);
 			if (type) {
 				func(*type);
@@ -381,12 +396,27 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 			}			
 		}
 
-		intrin_type_info returnval = return_type(intrin_param_map_info, info.retval);
-		intrin_type_info prefix = return_type(intrin_func_prefix_info, info.prefix);
-		packed_type_info postfix = return_type(packed_type_name_map_info, info.postfix);
+		mm_intrinsics_info mm_info;
 
-		svml_definition_info fullinfo{};
-		return fullinfo;
+		mm_info.ReturnType = return_type(intrin_param_map_info, info.retval);
+		mm_info.isInverse = is_inverse_func(info.func);
+		mm_info.MathFunction = mm_info.isInverse ? remove_inverse(info.func) : info.func;
+		mm_info.Prefix = return_type(intrin_func_prefix_info, info.prefix);
+		mm_info.Postfix = return_type(packed_type_name_map_info, info.postfix);
+		mm_info.NumberOfParams = params.size();
+
+		for (auto& param : params)
+		{
+			auto paramtype = return_type(intrin_param_map_info, param);
+			if (is_pointer_type(paramtype))
+				mm_info.NumberOfOutParams++;
+
+			mm_info.ParamList.push_back(paramtype);
+		}
+		
+		mm_info.FullFunctionName = info.fullsignature;
+
+		return svml_definition_info{ info, mm_info };
 	}
 	return { std::nullopt };
 }

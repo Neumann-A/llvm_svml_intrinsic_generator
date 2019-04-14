@@ -276,7 +276,8 @@ std::string_view to_string(const C& con, typename C::value_type::first_type type
 
 struct mm_intrinsics_info {
 	bool hasMask{ false };
-	bool isInverse{ false };
+	bool isInversePrefix{ false };
+	bool isInverseSuffix{ false };
 	bool isIntegerFunction{ false };
 	int NumberOfParams{ 0 };
 	int NumberOfOutParams{ 1 };
@@ -349,16 +350,26 @@ static const std::regex vdeclanalyzeregex{ "__vdecl_[a-zA-Z0-9]+[2468]" };
 	return { std::nullopt };
 }
 
-static const std::regex isinverseregex{"[a-z]+inv"};
-[[nodiscard]] bool is_inverse_func(const std::string& str)
+static const std::regex isinversesuffixregex{"[a-z]+inv"};
+static const std::regex isinverseprefixregex{ "inv[a-z]+" };
+[[nodiscard]] bool is_inverse_suffix_func(const std::string& str)
 {
 	std::smatch m;
-	return std::regex_match(str, m, isinverseregex);
+	return std::regex_match(str, m, isinversesuffixregex);
 }
-
-std::string remove_inverse(const std::string& str)
+[[nodiscard]] bool is_inverse_prefix_func(const std::string& str)
+{
+	std::smatch m;
+	return std::regex_match(str, m, isinverseprefixregex);
+}
+std::string remove_inverse_suffix(const std::string& str)
 {
 	return str.substr(0, str.size() - 3);
+}
+
+std::string remove_inverse_prefix(const std::string& str)
+{
+	return str.substr(3, str.size());
 }
 
 std::string build_vdecl_symbol_name(const mm_intrinsics_info& info)
@@ -375,8 +386,10 @@ std::string build_vdecl_symbol_name(const mm_intrinsics_info& info)
 	}
 	else
 	{
+		if (info.isInversePrefix)
+			stream << "inv";
 		stream << info.MathFunction;
-		if (info.isInverse)
+		if (info.isInverseSuffix)
 			stream << "inv";
 		stream << packed_type_vdecl_name_map_info[info.Suffix];
 	}
@@ -432,11 +445,17 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 			}			
 		}
 
+		//Setting all the intrinsic information. 
 		mm_intrinsics_info mm_info;
-
 		mm_info.ReturnType = return_type(intrin_param_map_info, info.retval);
-		mm_info.isInverse = is_inverse_func(info.func);
-		mm_info.MathFunction = mm_info.isInverse ? remove_inverse(info.func) : info.func;
+		mm_info.isInverseSuffix = is_inverse_suffix_func(info.func);
+		mm_info.isInversePrefix = is_inverse_prefix_func(info.func);
+		if (mm_info.isInverseSuffix)
+			mm_info.MathFunction = remove_inverse_suffix(info.func);
+		else if (mm_info.isInversePrefix)
+			mm_info.MathFunction = remove_inverse_prefix(info.func);
+		else
+			mm_info.MathFunction = info.func;
 		mm_info.Prefix = return_type(intrin_func_prefix_info, info.prefix);
 		mm_info.Suffix = return_type(packed_type_name_map_info, info.postfix);
 		mm_info.isIntegerFunction = is_interger_func(mm_info.Suffix);
@@ -517,6 +536,17 @@ std::vector<svml_mapping_info> analyzeInputLists(func_str_list& list) {
 		
 		elem.mapping_valid = true;
 		vdeclelem->svml_mapping.push_back(elem.strinfo.fullsignature);
+	}
+
+	for (auto& elem : vdeclinfo)
+	{
+		if (elem.svml_mapping.size() != 0)
+		{
+			::std::cerr << "VDECL SYMBOL: " << elem.FunctionName << " mapped to: \n";
+			for (auto& mapped : elem.svml_mapping)
+				::std::cerr << mapped << '\t';
+			::std::cerr << '\n';						
+		}
 	}
 
 	for (auto& elem : vdeclinfo)

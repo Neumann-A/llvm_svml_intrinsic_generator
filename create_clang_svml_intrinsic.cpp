@@ -124,11 +124,6 @@ enum class packed_type_info {
 	pd, ps, epi8, epi16, epi32, epi64, epu8, epu16, epu32, epu64,
 };
 
-struct packed_type {
-	std::string_view name;
-	std::size_t      size;
-};
-
 std::map<packed_type_info, std::string_view> packed_type_name_map_info{
 	{packed_type_info::pd, "pd"},
 	{packed_type_info::ps, "ps"},
@@ -153,6 +148,18 @@ std::map<packed_type_info, std::size_t> packed_type_size_map_info{
 	{packed_type_info::epu32, sizeof(std::uint32_t)},
 	{packed_type_info::epu64, sizeof(std::uint64_t)}
 };
+std::map<packed_type_info, std::string_view> packed_type_vdecl_name_map_info{
+	{packed_type_info::pd, ""},
+	{packed_type_info::ps, "f"},
+	{packed_type_info::epi8, "i8"},
+	{packed_type_info::epi16, "i16"},
+	{packed_type_info::epi32, "i32"},
+	{packed_type_info::epi64, "i64"},
+	{packed_type_info::epu8, "u8"},
+	{packed_type_info::epu16, "u16"},
+	{packed_type_info::epu32, "u32"},
+	{packed_type_info::epu64, "u64"}
+};
 
 std::map<intrin_type_info, std::string_view> intrin_param_map_info{
 	{intrin_type_info::m128i, "__m128i"},
@@ -176,26 +183,16 @@ std::map<intrin_type_info, std::string_view> intrin_param_map_info{
 	{intrin_type_info::mask8, "__mmask8"},
 	{intrin_type_info::mask16, "__mmask16"},
 };
-
-std::map<intrin_type_info, std::string_view> vdecl_type_map{
-	{intrin_type_info::m128i, "8_16"},
-	{intrin_type_info::m256i, "8_32"},
-	{intrin_type_info::m512i, "8_64"},
-	{intrin_type_info::m128i, "16_8"},
-	{intrin_type_info::m256i, "16_16"},
-	{intrin_type_info::m512i, "16_32"},
-	{intrin_type_info::m128i, "32_4"},
-	{intrin_type_info::m256i, "32_8"},
-	{intrin_type_info::m512i, "32_16"},
-	{intrin_type_info::m128i, "64_2"},
-	{intrin_type_info::m256i, "64_4"},
-	{intrin_type_info::m512i, "64_8"},
-	{intrin_type_info::m128, "f4"},
-	{intrin_type_info::m256, "f8"},
-	{intrin_type_info::m512, "f16"},
-	{intrin_type_info::m128d, "2"},
-	{intrin_type_info::m256d, "4"},
-	{intrin_type_info::m512d, "8"},
+std::map<intrin_type_info, std::size_t> intrin_type_size_map_info{
+	{intrin_type_info::m128, sizeof(__m128)},
+	{intrin_type_info::m256, 2*sizeof(__m128)},
+	{intrin_type_info::m512, 4*sizeof(__m128)},
+	{intrin_type_info::m128i, sizeof(__m128)},
+	{intrin_type_info::m256i, 2 * sizeof(__m128)},
+	{intrin_type_info::m512i, 4 * sizeof(__m128)},
+	{intrin_type_info::m128d, sizeof(__m128)},
+	{intrin_type_info::m256d, 2 * sizeof(__m128)},
+	{intrin_type_info::m512d, 4 * sizeof(__m128)}
 };
 
 bool is_pointer_type(intrin_type_info type)
@@ -227,8 +224,23 @@ bool is_mask_type(intrin_type_info type)
 		return false;
 	}
 }
-
-
+bool is_interger_func(packed_type_info type)
+{
+	switch (type)
+	{
+	case packed_type_info::epi8:
+	case packed_type_info::epi16:
+	case packed_type_info::epi32:
+	case packed_type_info::epi64:
+	case packed_type_info::epu8:
+	case packed_type_info::epu16:
+	case packed_type_info::epu32:
+	case packed_type_info::epu64:
+		return true;
+	default:
+		return false;
+	}
+}
 std::map<intrin_type_info, std::string_view> intrin_func_prefix_info{
 	{intrin_type_info::m128, "mm"},
 	{intrin_type_info::m256, "mm256"},
@@ -256,7 +268,6 @@ std::optional<typename C::value_type::first_type> from_string(const C& con, std:
 	else
 		return std::nullopt;
 };
-
 template<typename C>
 std::string_view to_string(const C& con, typename C::value_type::first_type type)
 {
@@ -266,14 +277,17 @@ std::string_view to_string(const C& con, typename C::value_type::first_type type
 struct mm_intrinsics_info {
 	bool hasMask{ false };
 	bool isInverse{ false };
+	bool isIntegerFunction{ false };
 	int NumberOfParams{ 0 };
 	int NumberOfOutParams{ 1 };
+	int PackedElements{ 0 };
 	std::string FullFunctionName;
 	std::string MathFunction;
 	intrin_type_info ReturnType;
 	intrin_type_info Prefix;
-	packed_type_info Postfix;
+	packed_type_info Suffix;
 	std::vector<intrin_type_info> ParamList;
+
 };
 
 struct extra_assembly_info {
@@ -282,12 +296,8 @@ struct extra_assembly_info {
 };
 
 struct vdecl_symbol_info {
-	bool isValid{ false };
-	int ReturnElements{ 1 };
-	int InputElements{ 1 };
-	intrin_type_info ReturnType{ intrin_type_info::undefined};
-	std::string FullFunctionName{""};
-	std::string SearchFunction{""};
+	std::string FunctionName{""};
+	std::vector<std::string> svml_mapping;
 };
 
 struct svml_string_info {
@@ -302,16 +312,18 @@ struct svml_string_info {
 struct svml_definition_info {
 	svml_string_info strinfo;
 	mm_intrinsics_info mminfo;
+	std::string svml_to_vdecl_name{ "" };
+	bool mapping_valid{ false };
 };
 
 std::ostream& operator<<(std::ostream& os, const svml_string_info& info)
 {
-	os << "Return: " << info.retval << '\n'; 
-	os << "Prefix: " << info.prefix << '\n';
-	os << "Mask: " << (info.mask.empty() ? false : true) << '\n';
-	os << "Name: " << info.func << '\n';
-	os << "Postfix: " << info.postfix << '\n';
-	os << "Params: " << info.params << '\n';
+	os << "SVML STRING INFO Return: " << info.retval << '\n'; 
+	os << "SVML STRING INFO Prefix: " << info.prefix << '\n';
+	os << "SVML STRING INFO Mask: " << (info.mask.empty() ? false : true) << '\n';
+	os << "SVML STRING INFO Name: " << info.func << '\n';
+	os << "SVML STRING INFO Postfix: " << info.postfix << '\n';
+	os << "SVML STRING INFO Params: " << info.params << '\n';
 	return os;
 }
 
@@ -319,7 +331,7 @@ struct svml_mapping_info{
 
 };
 
-static const std::regex vdeclanalyzeregex{ "__vdecl_([u|i][0-9]+)?([a-zA-Z]+)(1p|10)?([f]?[136]?[2468])" };
+static const std::regex vdeclanalyzeregex{ "__vdecl_[a-zA-Z0-9]+[2468]" };
 [[nodiscard]] std::optional<vdecl_symbol_info> analyze_vdecl_line(const std::string& str)
 {
 	std::smatch m;
@@ -331,12 +343,13 @@ static const std::regex vdeclanalyzeregex{ "__vdecl_([u|i][0-9]+)?([a-zA-Z]+)(1p
 			::std::cerr << "Match: " << elems << '\n';
 			
 		}
-		return vdecl_symbol_info{};
+		return vdecl_symbol_info{ m[0] };
 	}
+	
 	return { std::nullopt };
 }
 
-static const std::regex isinverseregex{"inv"};
+static const std::regex isinverseregex{"[a-z]+inv"};
 [[nodiscard]] bool is_inverse_func(const std::string& str)
 {
 	std::smatch m;
@@ -348,7 +361,30 @@ std::string remove_inverse(const std::string& str)
 	return str.substr(0, str.size() - 3);
 }
 
-static const std::regex svmlanalyzerregex{ "(__[^_]+) _([^_]+)_(mask)?_?([^_]+)_([^_]+) \\(([^\\(\\)]+)\\)" };
+std::string build_vdecl_symbol_name(const mm_intrinsics_info& info)
+{
+	std::stringstream stream;
+	stream << "__vdecl_";
+	if (info.isIntegerFunction)
+	{
+		stream << packed_type_vdecl_name_map_info[info.Suffix];
+		if ((info.MathFunction[0] == 'u' || info.MathFunction[0] == 'i'))
+			stream << info.MathFunction.substr(1, info.MathFunction.size());
+		else
+			stream << info.MathFunction;
+	}
+	else
+	{
+		stream << info.MathFunction;
+		if (info.isInverse)
+			stream << "inv";
+		stream << packed_type_vdecl_name_map_info[info.Suffix];
+	}
+	stream << std::to_string(info.PackedElements);
+	return stream.str();
+}
+
+static const std::regex svmlanalyzerregex{ "(__[^_]+) _([^_]+)_(mask)?_?(svml_)?([^_]+)_([^_]+) \\(([^\\(\\)]+)\\)" };
 static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4}|__mmask8|__mmask16)" };
 [[nodiscard]] std::optional<svml_definition_info> analyze_svml_line(const std::string& str)
 {
@@ -357,7 +393,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	std::regex_search(str, m, svmlanalyzerregex);
 	if (!m.empty())
 	{
-		svml_string_info info{ m[0],m[1],m[2],m[3],m[4],m[5],m[6] };
+		svml_string_info info{ m[0],m[1],m[2],m[4],m[5],m[6],m[7] };
 		//mm_intrinsics_info{ !info.mask.empty(), };
 		//::std::cerr << info;
 
@@ -378,7 +414,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 			}
 		};
 
-		auto return_type = [](auto & map, auto & strtype) {
+		auto return_type = [](auto& map,const std::string& strtype) {
 			auto type = from_string(map, strtype);
 			return type.value();
 		};
@@ -402,21 +438,20 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 		mm_info.isInverse = is_inverse_func(info.func);
 		mm_info.MathFunction = mm_info.isInverse ? remove_inverse(info.func) : info.func;
 		mm_info.Prefix = return_type(intrin_func_prefix_info, info.prefix);
-		mm_info.Postfix = return_type(packed_type_name_map_info, info.postfix);
+		mm_info.Suffix = return_type(packed_type_name_map_info, info.postfix);
+		mm_info.isIntegerFunction = is_interger_func(mm_info.Suffix);
 		mm_info.NumberOfParams = params.size();
-
-		for (auto& param : params)
-		{
-			auto paramtype = return_type(intrin_param_map_info, param);
-			if (is_pointer_type(paramtype))
-				mm_info.NumberOfOutParams++;
-
-			mm_info.ParamList.push_back(paramtype);
-		}
-		
+		mm_info.ParamList = params;
+		auto find_mask = [](auto & list) {
+			for (auto& elem : list)
+			{
+				if (is_mask_type(elem))
+					return true;
+			} return false; };
+		mm_info.hasMask = find_mask(params);
 		mm_info.FullFunctionName = info.fullsignature;
-
-		return svml_definition_info{ info, mm_info };
+		mm_info.PackedElements = intrin_type_size_map_info[mm_info.ReturnType]/packed_type_size_map_info[mm_info.Suffix];
+		return svml_definition_info{ info, mm_info, build_vdecl_symbol_name(mm_info)};
 	}
 	return { std::nullopt };
 }
@@ -465,8 +500,38 @@ std::vector<svml_definition_info> analyze_svml_list(std::vector<std::string>& st
 
 std::vector<svml_mapping_info> analyzeInputLists(func_str_list& list) {
 
-	//auto vdeclinfo = analyze_vdecl_list(list.vdecl);
+	auto vdeclinfo = analyze_vdecl_list(list.vdecl);
 	auto svmlinfo = analyze_svml_list(list.svml);
+
+	for (auto& elem : svmlinfo)
+	{
+		auto vdeclelem = std::find_if(vdeclinfo.begin(), vdeclinfo.end(), [&](vdecl_symbol_info & elem2) {
+			return elem2.FunctionName == elem.svml_to_vdecl_name;
+			});
+		if (vdeclelem == vdeclinfo.end())
+		{
+			::std::cerr << "No Mapping for: " << elem.strinfo.fullsignature << " found\n";
+			::std::cerr << "Mapping should have been: " << elem.svml_to_vdecl_name << "!\n";
+			continue;
+		}
+		
+		elem.mapping_valid = true;
+		vdeclelem->svml_mapping.push_back(elem.strinfo.fullsignature);
+	}
+
+	for (auto& elem : vdeclinfo)
+	{
+		if (elem.svml_mapping.size() == 0)
+		{
+			::std::cerr << "No Mapping for vdecl symbol: " << elem.FunctionName << " \n";
+		}
+	}
+
+	//std::size_t mappings_found = std::count_if(svmlinfo.begin(), svmlinfo.end(), [&](svml_definition_info & elem) {
+	//	return std::find_if(vdeclinfo.begin(), vdeclinfo.end(), [&](vdecl_symbol_info & elem2) { 
+	//		return elem2.FunctionName == elem.svml_to_vdecl_name; 
+	//		}) != vdeclinfo.end(); 
+	//	});
 	return {};
 }
 

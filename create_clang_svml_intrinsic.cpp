@@ -33,10 +33,10 @@ struct Opts
 	fs::path vdecl;
 	fs::path svml;
 	fs::path avx_out;
+	fs::path avx_test_out;
 	fs::path avx512_out;
-	//fs::path output;
-	//fs::path testoutput;
-} ;
+	fs::path avx512_test_out;
+};
 
 //Should probably be an array to run the options in a proper loop
 struct opts_string
@@ -44,7 +44,9 @@ struct opts_string
 	std::string_view vdecl;
 	std::string_view svml;
 	std::string_view avx_out;
+	std::string_view avx_test_out;
 	std::string_view avx512_out;
+	std::string_view avx512_test_out;
 };
 
 struct func_str_list
@@ -53,7 +55,7 @@ struct func_str_list
 	std::vector<std::string> svml;
 };
 
-constexpr const opts_string optstr{ "vdecl-list","svml-list", "avx-out","avx512-out" };
+constexpr const opts_string optstr{ "vdecl-list","svml-list", "avx-out","avx-test-out","avx512-out","avx512-test-out" };
 
 
 bo_opts::options_description desc{ "Options" };
@@ -72,7 +74,9 @@ void parseOptions(int argc, char** argv, Opts& opts)
 		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics_vs.txt" }), "list with all svml intrinsics");
 //		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics.txt" }), "list with all svml intrinsics");
 		(optstr.avx_out.data(), bo_opts::value<fs::path>(&opts.avx_out)->default_value({ "avx_svml_intrin.h" }), "Ouptut file for avx svml intrinsics");
+		(optstr.avx_test_out.data(), bo_opts::value<fs::path>(&opts.avx_test_out)->default_value({ "avx_svml_test.cpp" }), "Ouptut file for avx svml test file");
 		(optstr.avx512_out.data(), bo_opts::value<fs::path>(&opts.avx512_out)->default_value({ "avx512_svml_intrin.h" }), "Ouptut file for avx512 svml intrinsics");
+		(optstr.avx512_test_out.data(), bo_opts::value<fs::path>(&opts.avx512_test_out)->default_value({ "avx512_svml_test.cpp" }), "Ouptut file for avx512 svml test file");
 
 	bo_opts::variables_map vm;
 	bo_opts::store(bo_opts::parse_command_line(argc, argv, desc), vm);

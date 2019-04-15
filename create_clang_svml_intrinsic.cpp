@@ -69,8 +69,8 @@ void parseOptions(int argc, char** argv, Opts& opts)
 	desc.add_options()
 		("help", "This programm will")
 		(optstr.vdecl.data(), bo_opts::value<fs::path>(&opts.vdecl)->default_value({ "vdecl_list.txt" }), "list with vdecl symbols to map")
-//		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics_vs.txt" }), "list with all svml intrinsics");
-		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics.txt" }), "list with all svml intrinsics");
+		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics_vs.txt" }), "list with all svml intrinsics");
+//		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics.txt" }), "list with all svml intrinsics");
 		(optstr.avx_out.data(), bo_opts::value<fs::path>(&opts.avx_out)->default_value({ "avx_svml_intrin.h" }), "Ouptut file for avx svml intrinsics");
 		(optstr.avx512_out.data(), bo_opts::value<fs::path>(&opts.avx512_out)->default_value({ "avx512_svml_intrin.h" }), "Ouptut file for avx512 svml intrinsics");
 

@@ -32,6 +32,8 @@ struct Opts
 {
 	fs::path vdecl;
 	fs::path svml;
+	fs::path avx_out;
+	fs::path avx512_out;
 	//fs::path output;
 	//fs::path testoutput;
 } ;
@@ -41,6 +43,8 @@ struct opts_string
 {
 	std::string_view vdecl;
 	std::string_view svml;
+	std::string_view avx_out;
+	std::string_view avx512_out;
 };
 
 struct func_str_list
@@ -49,7 +53,7 @@ struct func_str_list
 	std::vector<std::string> svml;
 };
 
-constexpr const opts_string optstr{ "vdecl-list","svml-list" };
+constexpr const opts_string optstr{ "vdecl-list","svml-list", "avx-out","avx512-out" };
 
 
 bo_opts::options_description desc{ "Options" };
@@ -67,6 +71,8 @@ void parseOptions(int argc, char** argv, Opts& opts)
 		(optstr.vdecl.data(), bo_opts::value<fs::path>(&opts.vdecl)->default_value({ "vdecl_list.txt" }), "list with vdecl symbols to map")
 //		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics_vs.txt" }), "list with all svml intrinsics");
 		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics.txt" }), "list with all svml intrinsics");
+		(optstr.avx_out.data(), bo_opts::value<fs::path>(&opts.avx_out)->default_value({ "avx_svml_intrin.h" }), "Ouptut file for avx svml intrinsics");
+		(optstr.avx512_out.data(), bo_opts::value<fs::path>(&opts.avx512_out)->default_value({ "avx512_svml_intrin.h" }), "Ouptut file for avx512 svml intrinsics");
 
 	bo_opts::variables_map vm;
 	bo_opts::store(bo_opts::parse_command_line(argc, argv, desc), vm);
@@ -300,7 +306,7 @@ struct extra_assembly_info {
 
 struct vdecl_symbol_info {
 	std::string FunctionName{""};
-	std::vector<std::string> svml_mapping;
+	std::vector<svml_definition_info*> svml_mapping;
 };
 
 struct svml_string_info {
@@ -548,7 +554,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 		}
 		
 		elem.mapping_valid = true;
-		vdeclelem->svml_mapping.push_back(elem.strinfo.fullsignature);
+		vdeclelem->svml_mapping.push_back(&elem);
 	}
 
 	for (auto& elem : vdeclinfo)

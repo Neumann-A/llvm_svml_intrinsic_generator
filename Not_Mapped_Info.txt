@@ -1,0 +1,39 @@
+Visual Studio SVML List:
+No Mapping for vdecl symbol: __vdecl_i32divrem16
+No Mapping for vdecl symbol: __vdecl_u32divrem16
+No Mapping for vdecl symbol: __vdecl_nearbyint2
+No Mapping for vdecl symbol: __vdecl_nearbyint4
+No Mapping for vdecl symbol: __vdecl_rint2
+No Mapping for vdecl symbol: __vdecl_rint4
+No Mapping for vdecl symbol: __vdecl_sqrt8
+No Mapping for vdecl symbol: __vdecl_nearbyintf4
+No Mapping for vdecl symbol: __vdecl_nearbyintf8
+No Mapping for vdecl symbol: __vdecl_rintf4
+No Mapping for vdecl symbol: __vdecl_rintf8
+No Mapping for vdecl symbol: __vdecl_sqrtf16
+
+Intel Intrinsics SVML List:
+No Mapping for vdecl symbol: __vdecl_i32divrem16
+No Mapping for vdecl symbol: __vdecl_u32divrem16
+No Mapping for vdecl symbol: __vdecl_u32divrem4
+No Mapping for vdecl symbol: __vdecl_u32divrem8
+No Mapping for vdecl symbol: __vdecl_fmod2
+No Mapping for vdecl symbol: __vdecl_fmod4
+No Mapping for vdecl symbol: __vdecl_fmod8
+No Mapping for vdecl symbol: __vdecl_invcbrt8
+No Mapping for vdecl symbol: __vdecl_nearbyint2
+No Mapping for vdecl symbol: __vdecl_nearbyint4
+No Mapping for vdecl symbol: __vdecl_rint2
+No Mapping for vdecl symbol: __vdecl_rint4
+No Mapping for vdecl symbol: __vdecl_sqrt8
+No Mapping for vdecl symbol: __vdecl_fmodf4
+No Mapping for vdecl symbol: __vdecl_fmodf8
+No Mapping for vdecl symbol: __vdecl_fmodf16
+No Mapping for vdecl symbol: __vdecl_invcbrtf16
+No Mapping for vdecl symbol: __vdecl_log2f16
+No Mapping for vdecl symbol: __vdecl_nearbyintf4
+No Mapping for vdecl symbol: __vdecl_nearbyintf8
+No Mapping for vdecl symbol: __vdecl_rintf4
+No Mapping for vdecl symbol: __vdecl_rintf8
+No Mapping for vdecl symbol: __vdecl_roundf16
+No Mapping for vdecl symbol: __vdecl_sqrtf16

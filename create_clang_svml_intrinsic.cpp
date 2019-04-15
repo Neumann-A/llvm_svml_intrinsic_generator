@@ -65,6 +65,7 @@ void parseOptions(int argc, char** argv, Opts& opts)
 	desc.add_options()
 		("help", "This programm will")
 		(optstr.vdecl.data(), bo_opts::value<fs::path>(&opts.vdecl)->default_value({ "vdecl_list.txt" }), "list with vdecl symbols to map")
+//		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics_vs.txt" }), "list with all svml intrinsics");
 		(optstr.svml.data(), bo_opts::value<fs::path>(&opts.svml)->default_value({ "svml_intrinsics.txt" }), "list with all svml intrinsics");
 
 	bo_opts::variables_map vm;
@@ -196,7 +197,7 @@ std::map<intrin_type_info, std::size_t> intrin_type_size_map_info{
 	{intrin_type_info::m512d, 4 * sizeof(__m128)}
 };
 
-bool is_pointer_type(intrin_type_info type)
+[[nodiscard]] bool is_pointer_type(intrin_type_info type)
 {
 	switch (type)
 	{
@@ -214,7 +215,7 @@ bool is_pointer_type(intrin_type_info type)
 		return false;
 	}
 }
-bool is_mask_type(intrin_type_info type)
+[[nodiscard]] bool is_mask_type(intrin_type_info type)
 {
 	switch (type)
 	{
@@ -225,7 +226,7 @@ bool is_mask_type(intrin_type_info type)
 		return false;
 	}
 }
-bool is_interger_func(packed_type_info type)
+[[nodiscard]] bool is_interger_func(packed_type_info type)
 {
 	switch (type)
 	{
@@ -242,12 +243,12 @@ bool is_interger_func(packed_type_info type)
 		return false;
 	}
 }
+
 std::map<intrin_type_info, std::string_view> intrin_func_prefix_info{
 	{intrin_type_info::m128, "mm"},
 	{intrin_type_info::m256, "mm256"},
 	{intrin_type_info::m512, "mm512"},
 };
-
 std::map<intrin_type_info, std::string_view> intrin_func_suffix_info{
 	{intrin_type_info::m128i, ""},
 	{intrin_type_info::m256i, ""},
@@ -330,8 +331,17 @@ std::ostream& operator<<(std::ostream& os, const svml_string_info& info)
 }
 
 struct svml_mapping_info{
-
+	std::vector<vdecl_symbol_info> vdecl;
+	std::vector<svml_definition_info> svml;
 };
+
+[[nodiscard]] bool is_complex_func(const std::string_view str)
+{
+	bool is_csqrt = (str.find("csqrt") != std::string_view::npos);
+	bool is_clog = (str.find("clog") != std::string_view::npos);
+	bool is_cexp = (str.find("cexp") != std::string_view::npos);
+	return (is_csqrt || is_clog || is_cexp);
+}
 
 static const std::regex vdeclanalyzeregex{ "__vdecl_[a-zA-Z0-9]+[2468]" };
 [[nodiscard]] std::optional<vdecl_symbol_info> analyze_vdecl_line(const std::string& str)
@@ -398,7 +408,7 @@ std::string build_vdecl_symbol_name(const mm_intrinsics_info& info)
 	return stream.str();
 }
 
-static const std::regex svmlanalyzerregex{ "(__[^_]+) _([^_]+)_(mask)?_?(svml_)?([^_]+)_([^_]+) \\(([^\\(\\)]+)\\)" };
+static const std::regex svmlanalyzerregex{ "(__[^_]+) _([^_]+)_(mask)?_?(svml_)?([^_]+)_([^_]+) ?\\(([^\\(\\)]+)\\)" };
 static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4}|__mmask8|__mmask16)" };
 [[nodiscard]] std::optional<svml_definition_info> analyze_svml_line(const std::string& str)
 {
@@ -471,6 +481,8 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 		mm_info.hasMask = find_mask(params);
 		mm_info.FullFunctionName = info.fullsignature;
 		mm_info.PackedElements = intrin_type_size_map_info[mm_info.ReturnType]/packed_type_size_map_info[mm_info.Suffix];
+		if (is_complex_func(mm_info.MathFunction))
+			mm_info.PackedElements /= 2;
 		return svml_definition_info{ info, mm_info, build_vdecl_symbol_name(mm_info)};
 	}
 	return { std::nullopt };
@@ -518,7 +530,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	return symbol_info;
 }
 
-[[nodiscard]] std::vector<svml_mapping_info> analyzeInputLists(func_str_list& list) {
+[[nodiscard]] svml_mapping_info analyzeInputLists(func_str_list& list) {
 
 	auto vdeclinfo = analyze_vdecl_list(list.vdecl);
 	auto svmlinfo = analyze_svml_list(list.svml);
@@ -563,7 +575,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	//		return elem2.FunctionName == elem.svml_to_vdecl_name; 
 	//		}) != vdeclinfo.end(); 
 	//	});
-	return {};
+	return { vdeclinfo , svmlinfo };
 }
 
 void outputRemainingLists(func_str_list& list)

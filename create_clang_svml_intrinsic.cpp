@@ -8,13 +8,14 @@
 // date: 09.04.2019
 
 ///-------------------------------------------------------------------------------------------------
+#include <immintrin.h>
+
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <type_traits>
-#include <immintrin.h>
 #include <filesystem>
 #include <list>
 #include <deque>
@@ -475,7 +476,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	return { std::nullopt };
 }
 
-std::vector<vdecl_symbol_info> analyze_vdecl_list(std::vector<std::string>& strlist)
+[[nodiscard]] std::vector<vdecl_symbol_info> analyze_vdecl_list(std::vector<std::string>& strlist)
 {
 	std::vector<vdecl_symbol_info> symbol_info;
 	symbol_info.reserve(strlist.size());
@@ -496,7 +497,7 @@ std::vector<vdecl_symbol_info> analyze_vdecl_list(std::vector<std::string>& strl
 	return symbol_info;
 }
 
-std::vector<svml_definition_info> analyze_svml_list(std::vector<std::string>& strlist)
+[[nodiscard]] std::vector<svml_definition_info> analyze_svml_list(std::vector<std::string>& strlist)
 {
 	std::vector<svml_definition_info> symbol_info;
 	symbol_info.reserve(strlist.size());
@@ -517,7 +518,7 @@ std::vector<svml_definition_info> analyze_svml_list(std::vector<std::string>& st
 	return symbol_info;
 }
 
-std::vector<svml_mapping_info> analyzeInputLists(func_str_list& list) {
+[[nodiscard]] std::vector<svml_mapping_info> analyzeInputLists(func_str_list& list) {
 
 	auto vdeclinfo = analyze_vdecl_list(list.vdecl);
 	auto svmlinfo = analyze_svml_list(list.svml);

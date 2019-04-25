@@ -1,0 +1,67 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug-LLVM",
+      "generator": "Visual Studio 16 2019 Win64",
+      "configurationType": "Debug",
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "cmakeCommandArgs": "-T llvm_19 -DVCPKG_TARGET_TRIPLET=x64-windows-static",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "C:/Sources/Extern/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "variables": [],
+      "intelliSenseMode": "windows-clang-x64"
+    },
+    {
+      "name": "x64-Release-LLVM",
+      "generator": "Visual Studio 16 2019 Win64",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "cmakeCommandArgs": "-T llvm_19 -DVCPKG_TARGET_TRIPLET=x64-windows-static",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "C:/Sources/Extern/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "variables": [],
+      "intelliSenseMode": "windows-clang-x64"
+    },
+    {
+      "name": "SVML",
+      "cacheRoot": "C:/Sources/Repos/SVML/build",
+      "inheritEnvironments": [],
+      "variables": [],
+      "cacheGenerationCommand": "cmake -G \"Visual Studio 16 2019\" -A x64 -T llvm_19 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_TOOLCHAIN_FILE=C:/Sources/Extern/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Visual Studio 16 2019 Win64",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "cmakeCommandArgs": "-DVCPKG_TARGET_TRIPLET=x64-windows-static",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "C:/Sources/Extern/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "variables": [],
+      "intelliSenseMode": "windows-msvc-x64"
+    },
+    {
+      "name": "x64-Release-LLVM2",
+      "generator": "Visual Studio 16 2019 Win64",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "cmakeCommandArgs": "-T llvm_19 -DVCPKG_TARGET_TRIPLET=x64-windows-static",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "C:/Sources/Extern/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "variables": [],
+      "intelliSenseMode": "windows-clang-x64"
+    }
+  ]
+}

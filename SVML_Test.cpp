@@ -8,6 +8,7 @@
 // date: 09.04.2019
 ///-------------------------------------------------------------------------------------------------
 #include <immintrin.h>
+#include <cstdint>
 #include <array>
 #include <iostream>
 #include <iomanip>
@@ -53,30 +54,23 @@ extern "C"
 		return __vdecl_cos4(val);
 	}
 
-	extern __m256d 
+	extern __m256d
+		__attribute__((__always_inline__, __nodebug__,  __target__("avx"), __min_vector_width__(256)))
+		 __vdecl_sincos4(); //The return value is nessecary so that clang does not insert a vzeroupper before the call!
+
+	static __m256d
 		__attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
-		 __vdecl_sincos4(__m256d); //The return value is nessecary so that clang does not insert a vzeroupper before the call!
+		_mm256_sincos_pd(__m256d* pcosres, __m256d val)
+	{
+		__asm vmovapd ymm0, ymmword ptr[r8]; // Write val[r8] into ymm0
+		__vdecl_sincos4(); // Changes RAX, RCX & RDX; Defined as extern __m256d __vdecl_sincos4(); 
+		__m256d& cos = *pcosres; // Generates a required move instruction before the function call
+		__asm vmovapd ymmword ptr[cos], ymm1; //Write cosine result
 
-	static __inline__ __m256d 
-		__attribute__((__always_inline__, __nodebug__, regparam(3), __target__("avx"), __min_vector_width__(256)))
-		_mm256_sincos_pd(__m256d __attribute__((align_value(32))) * pcosres  , __m256d val)
-	{	
-		__m256d sinres; //Dummy return value; should deactivate the warning somehow; 
+		__m256d sin;
+		__asm vmovapd ymmword ptr[sin], ymm0; //Write sine result into sin
 
-		//Store param adresses in registers
-		__asm mov rdi, pcosres; // pcosres;
-		//__asm mov rdi, rdx; // pcosres;
-		//__asm mov rsi, rcx; // return value;
-		__vdecl_sincos4(val); // Changes RAX, RCX & RDX; Defined as	extern __m256d __vdecl_sincos4(__m256d); 
-
-		__asm vmovapd ymmword ptr [rdi], ymm1; //Write sine result into return value
-		//__asm vmovapd pcosres, ymm1; //Write cosine result
-		//__asm vmovapd ymmword ptr [rsi], ymm0; //Write sine result into return value
-		__asm vmovapd ymmword ptr[sinres], ymm0; //Write sine result into return value
-		//__asm mov sinres, rsi; //Write sine result into return value
-		//__asm mov pcosres, rdi; //Write cosine result
-
-		return sinres; //Does nothing; Value already saved. 
+		return std::move(sin);
 	}
 
 	//extern __m256d __vdecl_sincos4(__m256d); //The return value is nessecary so that clang does not insert a vzeroupper before the call!
@@ -101,12 +95,15 @@ extern "C"
 __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyData)
 {
 	__m256d Input = _mm256_load_pd(MyData.data());
-	__m256d Output[2];
-	///__asm nop; // pcosres;
-	Output[0] = _mm256_sincos_pd(&Output[1], Input);
-	///	__asm nop; // pcosres;
-	_mm256_store_pd(CosData.data(), Output[1]);
-	_mm256_store_pd(SinData.data(), Output[0]);
+	__m256d Output;
+	//__m256d Output[2];
+
+	Input = _mm256_sincos_pd(&Output, Input);
+
+	//_mm256_store_pd(CosData.data(), Output[1]);
+	//_mm256_store_pd(SinData.data(), Output[0]);
+	_mm256_store_pd(SinData.data(), Input);
+	_mm256_store_pd(CosData.data(), Output);
 }
 
 int main()

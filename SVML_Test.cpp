@@ -24,6 +24,7 @@ static_assert(sizeof(Vector4) == sizeof(__m256d));
 //static_assert(sizeof(Vector8) == sizeof(__m512d));
 
 //Floating point
+
 using Vectorf4  = __declspec(align(32)) std::array<float, 4>;
 using Vectorf8  = __declspec(align(32)) std::array<float, 8>;
 using Vectorf16 = __declspec(align(32)) std::array<float, 16>;
@@ -35,8 +36,11 @@ static_assert(sizeof(Vectorf8) == sizeof(__m256));
 //extern __cdecl __m256d (&__vdecl_sincos4(__m256d))[2];
 extern "C"
 {
-#define __DEFAULT_FN_ATTRS __attribute__((__always_inline__, __nodebug__))
-
+#define __DEFAULT_FN_ATTRS __attribute__((__always_inline__, __nodebug__,ms_abi, __target__("avx"), __min_vector_width__(256)))
+#define __DEFAULT_FN_ATTRS_CALLER __attribute__((__always_inline__, __nodebug__,no_caller_saved_registers,ms_abi, __target__("avx"), __min_vector_width__(256)))
+#define __DEFAULT_FN_ATTRS128 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(128)))
+#define __NO_CALLER_SAVED_REGISTER__ __attribute__((no_caller_saved_registers))
+#define __REPARAM__ __attribute__((regparm(2)))
 	extern __m256d __vdecl_sin4(__m256d);
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d val)
 	{
@@ -49,17 +53,29 @@ extern "C"
 		return __vdecl_cos4(val);
 	}
 
-	extern __m256d __vdecl_sincos4(__m256d); //The return value is nessecary so that clang does not insert a vzeroupper before the call!
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sincos_pd(__m256d* pcosres, __m256d val)
+	extern __m256d 
+		__attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
+		 __vdecl_sincos4(__m256d); //The return value is nessecary so that clang does not insert a vzeroupper before the call!
+
+	static __inline__ __m256d 
+		__attribute__((__always_inline__, __nodebug__, regparam(3), __target__("avx"), __min_vector_width__(256)))
+		_mm256_sincos_pd(__m256d __attribute__((align_value(32))) * pcosres  , __m256d val)
 	{	
-		//Store param adresses in registers
-		__asm mov rdi, rdx; // pcosres;
-		__asm mov rsi, rcx; // return value;
-		__vdecl_sincos4(val); // Changes RAX, RCX & RDX; Defined as	extern __m256d __vdecl_sincos4(__m256d); 
-		//Write result into storage
-		__asm vmovupd ymmword ptr [rdi], ymm1; //Write cosine result
-		__asm vmovupd ymmword ptr [rsi], ymm0; //Write sine result into return value
 		__m256d sinres; //Dummy return value; should deactivate the warning somehow; 
+
+		//Store param adresses in registers
+		__asm mov rdi, pcosres; // pcosres;
+		//__asm mov rdi, rdx; // pcosres;
+		//__asm mov rsi, rcx; // return value;
+		__vdecl_sincos4(val); // Changes RAX, RCX & RDX; Defined as	extern __m256d __vdecl_sincos4(__m256d); 
+
+		__asm vmovapd ymmword ptr [rdi], ymm1; //Write sine result into return value
+		//__asm vmovapd pcosres, ymm1; //Write cosine result
+		//__asm vmovapd ymmword ptr [rsi], ymm0; //Write sine result into return value
+		__asm vmovapd ymmword ptr[sinres], ymm0; //Write sine result into return value
+		//__asm mov sinres, rsi; //Write sine result into return value
+		//__asm mov pcosres, rdi; //Write cosine result
+
 		return sinres; //Does nothing; Value already saved. 
 	}
 
@@ -84,11 +100,11 @@ extern "C"
 
 __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyData)
 {
-	__m256d Input = _mm256_loadu_pd(MyData.data());
+	__m256d Input = _mm256_load_pd(MyData.data());
 	__m256d Output[2];
-
+	///__asm nop; // pcosres;
 	Output[0] = _mm256_sincos_pd(&Output[1], Input);
-
+	///	__asm nop; // pcosres;
 	_mm256_store_pd(CosData.data(), Output[1]);
 	_mm256_store_pd(SinData.data(), Output[0]);
 }
@@ -96,9 +112,9 @@ __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyD
 int main()
 {
 	constexpr const double pi = 3.141592653589793238462643383279502884197169399375; 
-	Vector4 MyData{ 0.0, pi/6.0, pi*0.5, 3.0*pi*0.25};
-	Vector4 SinData;
-	Vector4 CosData;
+	alignas(32) Vector4 MyData{ 0.0, pi/6.0, pi*0.5, 3.0*pi*0.25};
+	alignas(32) Vector4 SinData;
+	alignas(32) Vector4 CosData;
 	
 	SinCos(SinData, CosData, MyData);
 	for (auto i = 0; i < MyData.size(); ++i)

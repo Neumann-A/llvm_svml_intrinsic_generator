@@ -1,12 +1,12 @@
-///-------------------------------------------------------------------------------------------------
-// file:	CMakeLists.txt
-//
-// Copyright (c) 2019 Alexander Neumann.
-// MIT License see https://github.com/Neumann-A/llvm_svml_intrinsic_generator/blob/master/LICENSE
-//
-// author: Alexander
-// date: 09.04.2019
-///-------------------------------------------------------------------------------------------------
+##///-------------------------------------------------------------------------------------------------
+##// file:	CMakeLists.txt
+##//
+##// Copyright (c) 2019 Alexander Neumann.
+##// MIT License see https://github.com/Neumann-A/llvm_svml_intrinsic_generator/blob/master/LICENSE
+##//
+##// author: Alexander
+##// date: 09.04.2019
+##///-------------------------------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.9 FATAL_ERROR)
 include(GNUInstallDirs)
 
@@ -32,4 +32,5 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 
 ##---------------------------------------------------------------------------------------##
 add_executable(SVML_FirstTry SVML_Test.cpp)
-target_compile_options(SVML_FirstTry PRIVATE /arch:AVX2)
+target_compile_features(SVML_FirstTry PRIVATE cxx_std_17)
+target_compile_options(SVML_FirstTry PRIVATE "/arch:AVX;/Oy;/Z7;/sdl-;/GS-")

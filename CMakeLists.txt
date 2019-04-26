@@ -32,7 +32,7 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 
 ##---------------------------------------------------------------------------------------##
 #ENABLE_LANGUAGE(ASM_MASM)
-add_executable(SVML_FirstTry SVML_Test.cpp )#sincos.asm)
+add_executable(SVML_FirstTry SVML_Test.cpp aligned_array.h)#sincos.asm)
 target_compile_features(SVML_FirstTry PRIVATE cxx_std_17)
 find_package(GTest MODULE REQUIRED)
 target_link_libraries(SVML_FirstTry PRIVATE GTest::GTest GTest::Main)

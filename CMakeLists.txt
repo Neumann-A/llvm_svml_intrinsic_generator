@@ -31,6 +31,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Boost::program_options)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
 ##---------------------------------------------------------------------------------------##
-add_executable(SVML_FirstTry SVML_Test.cpp)
+#ENABLE_LANGUAGE(ASM_MASM)
+add_executable(SVML_FirstTry SVML_Test.cpp )#sincos.asm)
 target_compile_features(SVML_FirstTry PRIVATE cxx_std_17)
-target_compile_options(SVML_FirstTry PRIVATE "/arch:AVX;/Oy;/Z7;/sdl-;/GS-")
+find_package(gtest REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest)
+target_compile_options(SVML_FirstTry PRIVATE "/arch:AVX;/Oy;/Z7;/sdl-;/GS-;-flto;-fwhole-program-vtables")

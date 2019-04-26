@@ -17,9 +17,20 @@
 #include <iomanip>
 #include <cmath>
 
-#include "aligned_array.h"
+//#include "aligned_array.h"
 
-std::array<double, 2> test;
+alignas(16) std::array<double, 2> align16;
+alignas(32) std::array<double, 4> align32;
+alignas(64) std::array<double, 4> align64;
+
+static_assert(std::alignment_of_v< decltype(align16) > == 8);
+//Those to fail with clang. 
+//static_assert(std::alignment_of_v< decltype(align16) > == std::alignment_of_v< __m128d >);
+//static_assert(std::alignment_of_v< decltype(align32) > == std::alignment_of_v< __m256d >);
+
+template <typename T, ::std::size_t N, std::size_t align = ::std::alignment_of_v< T>> 
+struct alignas(align) aligned_array : ::std::array<T, N> {};
+
 //using aligned_double = std::aligned_storage_t<sizeof(double)*2,16>;
 using Vector2 = aligned_array<double, 2, 16>;
 using Vector4 = aligned_array<double, 4, 32>;

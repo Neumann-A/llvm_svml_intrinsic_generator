@@ -90,17 +90,7 @@ extern "C"
 
 __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyData)
 {
-#ifdef __clang__
-	std::cout << MyData.data() << '\n';
 	__m256d Input = _mm256_load_pd((double*)MyData.data());
-
-	//__asm__(".intel_syntax noprefix");
-	__asm__("nop");
-	//__m256d Input;
-	//__asm__("vmovupd %[Data], %[In]" : [In] "=v" (Input), [Data] "=&v" (MyData) :  );
-#else
-	__m256d Input = _mm256_load_pd((double*)MyData.data());
-#endif
 	__m256d Output;
 	Input = _mm256_sincos_pd(&Output, Input);
 	_mm256_store_pd((double*)SinData.data(), Input);

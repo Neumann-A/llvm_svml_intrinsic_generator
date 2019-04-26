@@ -59,28 +59,46 @@ extern "C"
 #define __DEFAULT_FN_ATTRS __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
 #define __DEFAULT_FN_ATTRS128 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(128)))
 
-	extern __m256d __vdecl_sin4(__m256d);
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d val)
+	//extern __m256d __vdecl_sin4(__m256d);
+	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d value)
 	{
- 		return __vdecl_sin4(val);
+		__asm__(".intel_syntax noprefix");
+		__asm__ __volatile__("vmovapd %[val], %%ymm0 \t\n"
+			"call __vdecl_sin4 \t\n"
+			"vmovapd %%ymm0, %[val] \t\n"
+			: [val] "+&v" (value)
+			:
+			: "%rax", "%r10", "%r11", "%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+		);
+		return value;
+ 		//return __vdecl_sin4(value);
 	}
 
-	extern __m256d __vdecl_cos4(__m256d);
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d val)
+	//extern __m256d __vdecl_cos4(__m256d);
+	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d value)
 	{
-		return __vdecl_cos4(val);
+		__asm__(".intel_syntax noprefix");
+		__asm__ __volatile__("vmovapd %[val], %%ymm0 \t\n"
+			"call __vdecl_cos4 \t\n"
+			"vmovapd %%ymm0, %[val] \t\n"
+			: [val] "+&v" (value)
+			:
+			: "%rax", "%r11","%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+		);
+		return value;
+		//return __vdecl_cos4(value);
 	}
 
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sincos_pd(__m256d* pcosres, __m256d input)
 	{
 		__asm__(".intel_syntax noprefix");
-		__asm__("sub $32, %rsp"); 
+		//__asm__("sub $32, %rsp"); 
 		__asm__("call __vdecl_sincos4 \t\n"
 			: [sin] "+v" (input), [cos] "=v" (*pcosres)
 			:
 			: "%rax", "%rcx", "%rdx", "%rsp"
 			);
-		__asm__("add $32, %rsp");
+		//__asm__("add $32, %rsp");
 		return input; // Input will be ymm0 and will be changed correctly
 	};
 
@@ -92,7 +110,9 @@ __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyD
 {
 	__m256d Input = _mm256_load_pd((double*)MyData.data());
 	__m256d Output;
-	Input = _mm256_sincos_pd(&Output, Input);
+	//Input = _mm256_sincos_pd(&Output, Input);
+	Output = _mm256_cos_pd(Input);
+	Input = _mm256_sin_pd(Input);
 	_mm256_store_pd((double*)SinData.data(), Input);
 	_mm256_store_pd((double*)CosData.data(), Output);
 }
@@ -101,23 +121,18 @@ __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyD
 
 TEST(SVML_intrinsics_m256d, sincos) {
 	constexpr const double pi = 3.141592653589793238462643383279502884197169399375;
-	alignas(32) Vector4 MyData { 0.0, pi / 6.0, pi * 0.5, 3.0 * pi * 0.25 };
-	alignas(32) Vector4 SinData;
-	alignas(32) Vector4 CosData;
+	Vector4 MyData{ {0.0, pi / 6.0, pi * 0.5, 3.0 * pi * 0.25} };
+	Vector4 SinData;
+	Vector4 CosData;
 
 	SinCos(SinData, CosData, MyData);
 	for (auto i = 0; i < MyData.size(); ++i)
 	{
-
-
-		int offset = 0;
 		const auto sinres = std::sin(MyData[i]);
 		const auto cosres = std::cos(MyData[i]);
 
 		ASSERT_DOUBLE_EQ(sinres, SinData[i]);
 		ASSERT_DOUBLE_EQ(cosres, CosData[i]);
-
-
 	}
 }
 

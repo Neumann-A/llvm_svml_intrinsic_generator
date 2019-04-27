@@ -56,7 +56,8 @@ static_assert(sizeof(Vectorf8) == sizeof(__m256));
 #ifdef __clang__
 extern "C"
 {
-#define __DEFAULT_FN_ATTRS __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
+#define __DEFAULT_FN_ATTRS512 __attribute__((__always_inline__, __nodebug__, __target__("avx512"), __min_vector_width__(512)))
+#define __DEFAULT_FN_ATTRS256 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
 #define __DEFAULT_FN_ATTRS128 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(128)))
 
 	// Default register clobbering.
@@ -72,7 +73,7 @@ extern "C"
 	// d) would be good if clang would implement __vdecl calling convention as __vectorcall convention with different name mangling. 
 
 
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d input)
+	static __inline__ __m256d __DEFAULT_FN_ATTRS256 _mm256_sin_pd(__m256d input)
 	{
 		register __m256d regymm0 asm("ymm0") = input;
 		__asm__ (
@@ -84,7 +85,7 @@ extern "C"
 		return regymm0;
 	}
 
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d input)
+	static __inline__ __m256d __DEFAULT_FN_ATTRS256 _mm256_cos_pd(__m256d input)
 	{
 		register __m256d regymm0 asm("ymm0") = input;
 		__asm__ (
@@ -96,7 +97,7 @@ extern "C"
 		return regymm0;
 	}
 
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sincos_pd(__m256d* pcosres, __m256d input)
+	static __inline__ __m256d __DEFAULT_FN_ATTRS256 _mm256_sincos_pd(__m256d* pcosres, __m256d input)
 	{
 		register __m256d regymm0 asm("ymm0") = input;
 		register __m256d regymm1 asm("ymm1");

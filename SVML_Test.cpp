@@ -60,49 +60,54 @@ extern "C"
 #define __DEFAULT_FN_ATTRS128 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(128)))
 
 	//extern __m256d __vdecl_sin4(__m256d);
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d value)
+	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d input)
 	{
-		__asm__(".intel_syntax noprefix");
-		__asm__ __volatile__("vmovapd %[val], %%ymm0 \t\n"
+		register __m256d regymm0 asm("ymm0") = input;
+		//register __m256d regymm0_out asm("ymm0");
+		__asm__ __volatile__(
 			"call __vdecl_sin4 \t\n"
-			"vmovapd %%ymm0, %[val] \t\n"
-			: [val] "+&v" (value)
-			:
-			: "%rax", "%r10", "%r11", "%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+			: [sin] "=v" (regymm0)
+			: [in] "0" (regymm0)
+			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
 		);
-		return value;
- 		//return __vdecl_sin4(value);
+
+		return regymm0; // Input will be ymm0 and will be changed correctly
 	}
 
 	//extern __m256d __vdecl_cos4(__m256d);
-	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d value)
+	/*static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d value)
 	{
-		__asm__(".intel_syntax noprefix");
-		__asm__ __volatile__("vmovapd %[val], %%ymm0 \t\n"
+		__asm__ __volatile__(
 			"call __vdecl_cos4 \t\n"
-			"vmovapd %%ymm0, %[val] \t\n"
-			: [val] "+&v" (value)
-			:
-			: "%rax", "%r11","%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+			: [sin] "=v" (ret)
+			: [sinin] "0" (ret), [in] "v" (value)
+			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1","%ymm2","%ymm3", "%ymm4", "%ymm5"
+
 		);
-		return value;
-		//return __vdecl_cos4(value);
-	}
+		return ret;
+	}*/
 
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sincos_pd(__m256d* pcosres, __m256d input)
 	{
-		__asm__(".intel_syntax noprefix");
-		//__asm__("sub $32, %rsp"); 
-		__asm__("call __vdecl_sincos4 \t\n"
-			: [sin] "+v" (input), [cos] "=v" (*pcosres)
-			:
-			: "%rax", "%rcx", "%rdx", "%rsp"
-			);
-		//__asm__("add $32, %rsp");
-		return input; // Input will be ymm0 and will be changed correctly
+		//__m256d ret;
+		//register __m256d * pret asm("ymm0") = &ret;
+		register __m256d regymm0 asm("ymm0") = input;
+		register __m256d regymm1 asm("ymm1");
+		//register __m256d regymm0_out asm("ymm0");
+		__asm__ __volatile__(//"vmovapd %in, %%ymm0 \t\n"
+			//"sub $32, %%rsp \t\n"
+			"call __vdecl_sincos4 \t\n"
+			//"add $32, %%rsp \t\n"
+			: [sin] "=&v" (regymm0), [cos] "=v" (regymm1)
+			:  [in] "0" (regymm0)/*, [sinin] "0" (regymm0_out), [cosin] "1" (regymm1)*/
+			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+			//: "%rax", "%rcx", "%rdx", "%rsp"
+		);
+		*pcosres = regymm1;
+		return regymm0;
 	};
 
-}
+};
 
 #endif
 
@@ -110,11 +115,14 @@ __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyD
 {
 	__m256d Input = _mm256_load_pd((double*)MyData.data());
 	__m256d Output;
-	//Input = _mm256_sincos_pd(&Output, Input);
-	Output = _mm256_cos_pd(Input);
-	Input = _mm256_sin_pd(Input);
-	_mm256_store_pd((double*)SinData.data(), Input);
+	__m256d Output2;
+	Output2 = _mm256_sincos_pd(&Output, Input);
+	_mm256_store_pd((double*)SinData.data(), Output2);
 	_mm256_store_pd((double*)CosData.data(), Output);
+	//Output = _mm256_cos_pd(Input);;
+	Output2 = _mm256_sin_pd(Input);
+	_mm256_store_pd((double*)SinData.data(), Output2);
+	//_mm256_store_pd((double*)CosData.data(), std::move(Output));
 }
 
 
@@ -130,6 +138,9 @@ TEST(SVML_intrinsics_m256d, sincos) {
 	{
 		const auto sinres = std::sin(MyData[i]);
 		const auto cosres = std::cos(MyData[i]);
+
+		std::cout << "Sin result: intrinsic vs cmath\t" << std::setw(12) << std::setprecision(7) << SinData[i] << "|\t" << std::setw(12) << sinres << '\n';
+		std::cout << "Cos result: intrinsic vs cmath\t" << std::setw(12) << std::setprecision(7) << CosData[i] << "|\t" << std::setw(12) << cosres << '\n';
 
 		ASSERT_DOUBLE_EQ(sinres, SinData[i]);
 		ASSERT_DOUBLE_EQ(cosres, CosData[i]);

@@ -50,6 +50,20 @@
       "intelliSenseMode": "windows-msvc-x64"
     },
     {
+      "name": "x64-Debug",
+      "generator": "Visual Studio 16 2019 Win64",
+      "configurationType": "Debug",
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "cmakeCommandArgs": "-DVCPKG_TARGET_TRIPLET=x64-windows-static",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "C:/Sources/Extern/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "variables": [],
+      "intelliSenseMode": "windows-msvc-x64"
+    },
+    {
       "name": "x64-Release-LLVM2",
       "generator": "Visual Studio 16 2019 Win64",
       "configurationType": "RelWithDebInfo",

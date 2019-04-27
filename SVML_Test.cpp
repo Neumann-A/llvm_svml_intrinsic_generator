@@ -64,28 +64,26 @@ extern "C"
 	{
 		register __m256d regymm0 asm("ymm0") = input;
 		//register __m256d regymm0_out asm("ymm0");
-		__asm__ __volatile__(
+		__asm__ (
 			"call __vdecl_sin4 \t\n"
 			: [sin] "=v" (regymm0)
 			: [in] "0" (regymm0)
 			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
 		);
-
 		return regymm0; // Input will be ymm0 and will be changed correctly
 	}
 
-	//extern __m256d __vdecl_cos4(__m256d);
-	/*static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d value)
+	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d input)
 	{
-		__asm__ __volatile__(
+		register __m256d regymm0 asm("ymm0") = input;
+		__asm__ (
 			"call __vdecl_cos4 \t\n"
-			: [sin] "=v" (ret)
-			: [sinin] "0" (ret), [in] "v" (value)
-			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1","%ymm2","%ymm3", "%ymm4", "%ymm5"
-
+			: [sin] "=v" (regymm0)
+			: [in] "0" (regymm0)
+			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
 		);
-		return ret;
-	}*/
+		return regymm0; // Input will be ymm0 and will be changed correctly
+	}
 
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sincos_pd(__m256d* pcosres, __m256d input)
 	{
@@ -94,11 +92,11 @@ extern "C"
 		register __m256d regymm0 asm("ymm0") = input;
 		register __m256d regymm1 asm("ymm1");
 		//register __m256d regymm0_out asm("ymm0");
-		__asm__ __volatile__(//"vmovapd %in, %%ymm0 \t\n"
+		__asm__ (//"vmovapd %in, %%ymm0 \t\n"
 			//"sub $32, %%rsp \t\n"
 			"call __vdecl_sincos4 \t\n"
 			//"add $32, %%rsp \t\n"
-			: [sin] "=&v" (regymm0), [cos] "=v" (regymm1)
+			: [sin] "=v" (regymm0), [cos] "=v" (regymm1)
 			:  [in] "0" (regymm0)/*, [sinin] "0" (regymm0_out), [cosin] "1" (regymm1)*/
 			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
 			//: "%rax", "%rcx", "%rdx", "%rsp"
@@ -119,10 +117,11 @@ __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyD
 	Output2 = _mm256_sincos_pd(&Output, Input);
 	_mm256_store_pd((double*)SinData.data(), Output2);
 	_mm256_store_pd((double*)CosData.data(), Output);
-	//Output = _mm256_cos_pd(Input);;
-	Output2 = _mm256_sin_pd(Input);
-	_mm256_store_pd((double*)SinData.data(), Output2);
-	//_mm256_store_pd((double*)CosData.data(), std::move(Output));
+	Output = _mm256_cos_pd(Input);;
+	//Output2 = _mm256_sin_pd(Input);
+	//_mm256_store_pd((double*)SinData.data(), Output2);
+	_mm256_store_pd((double*)CosData.data(), Output);
+	//auto Out3=_mm256_erfinv_pd(Input);
 }
 
 

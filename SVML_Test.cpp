@@ -64,11 +64,12 @@ extern "C"
 	// Plan
 	// _vdecl calling convention seems to mean:
 	// all values are takens as input from ymm registers (starting at 0) and results are returned from ymm registers (starting at 0)
-	// a) registers used must be removed from default clobbering list
-	// b) registers used as input and output must be linked 
+	// a) in asm: used registers must be removed from default clobbering list
+	// b) in asm: registers used as input and output must be linked 
 	// c) there seems to be no need to allocate extra stack space for the function call since _vdecl symbols are effectivly vectorcall
 	//	  symbols and only paramters passed on the stack or HVA arguments need extra shadow space (the svml symbols will not have so many
 	//	  parameters)
+	// d) would be good if clang would implement __vdecl calling convention as __vectorcall convention with different name mangling. 
 
 
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d input)

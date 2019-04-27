@@ -146,24 +146,3 @@ TEST(SVML_intrinsics_m256d, sincos) {
 		ASSERT_DOUBLE_EQ(cosres, CosData[i]);
 	}
 }
-
-//int main()
-//{
-//	constexpr const double pi = 3.141592653589793238462643383279502884197169399375; 
-//	alignas(32) Vector4 MyData{ 0.0, pi/6.0, pi*0.5, 3.0*pi*0.25};
-//	alignas(32) Vector4 SinData;
-//	alignas(32) Vector4 CosData;
-//	
-//
-//	SinCos(SinData, CosData, MyData);
-//	for (auto i = 0; i < MyData.size(); ++i)
-//	{
-//		std::cout << "Sin result: intrinsic vs cmath\t" << std::setw(12) << std::setprecision(7) << SinData[i] << "|\t" << std::setw(12) << std::sin(MyData[i]) << '\n';
-//		std::cout << "Cos result: intrinsic vs cmath\t" << std::setw(12) << std::setprecision(7) << CosData[i] << "|\t" << std::setw(12) << std::cos(MyData[i]) << '\n';
-//	}
-//	std::system("pause");
-//	return 0;
-//}
-
-
-

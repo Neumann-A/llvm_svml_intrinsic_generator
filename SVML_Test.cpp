@@ -59,18 +59,28 @@ extern "C"
 #define __DEFAULT_FN_ATTRS __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
 #define __DEFAULT_FN_ATTRS128 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(128)))
 
-	//extern __m256d __vdecl_sin4(__m256d);
+	// Default register clobbering.
+	//: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+	// Plan
+	// _vdecl calling convention seems to mean:
+	// all values are takens as input from ymm registers (starting at 0) and results are returned from ymm registers (starting at 0)
+	// a) registers used must be removed from default clobbering list
+	// b) registers used as input and output must be linked 
+	// c) there seems to be no need to allocate extra stack space for the function call since _vdecl symbols are effectivly vectorcall
+	//	  symbols and only paramters passed on the stack or HVA arguments need extra shadow space (the svml symbols will not have so many
+	//	  parameters)
+
+
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sin_pd(__m256d input)
 	{
 		register __m256d regymm0 asm("ymm0") = input;
-		//register __m256d regymm0_out asm("ymm0");
 		__asm__ (
 			"call __vdecl_sin4 \t\n"
 			: [sin] "=v" (regymm0)
 			: [in] "0" (regymm0)
 			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
 		);
-		return regymm0; // Input will be ymm0 and will be changed correctly
+		return regymm0;
 	}
 
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_cos_pd(__m256d input)
@@ -82,24 +92,20 @@ extern "C"
 			: [in] "0" (regymm0)
 			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
 		);
-		return regymm0; // Input will be ymm0 and will be changed correctly
+		return regymm0;
 	}
 
 	static __inline__ __m256d __DEFAULT_FN_ATTRS _mm256_sincos_pd(__m256d* pcosres, __m256d input)
 	{
-		//__m256d ret;
-		//register __m256d * pret asm("ymm0") = &ret;
 		register __m256d regymm0 asm("ymm0") = input;
 		register __m256d regymm1 asm("ymm1");
-		//register __m256d regymm0_out asm("ymm0");
 		__asm__ (//"vmovapd %in, %%ymm0 \t\n"
 			//"sub $32, %%rsp \t\n"
 			"call __vdecl_sincos4 \t\n"
 			//"add $32, %%rsp \t\n"
 			: [sin] "=v" (regymm0), [cos] "=v" (regymm1)
-			:  [in] "0" (regymm0)/*, [sinin] "0" (regymm0_out), [cosin] "1" (regymm1)*/
+			:  [in] "0" (regymm0)
 			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
-			//: "%rax", "%rcx", "%rdx", "%rsp"
 		);
 		*pcosres = regymm1;
 		return regymm0;

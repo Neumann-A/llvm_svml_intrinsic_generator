@@ -14,40 +14,19 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <type_traits>
-#include <filesystem>
-#include <list>
-#include <deque>
-#include <map>
+
 #include <optional>
 #include <regex>
 
 #include <boost/program_options.hpp>
 
+#include "create_clang_svml_intrinsic.h"
+#include "svml_assembly_creator.h"
+#include "svml_test_creator.h"
+
 namespace bo_opts = ::boost::program_options;
 namespace fs = ::std::filesystem;
-
-struct Opts
-{
-	fs::path vdecl;
-	fs::path svml;
-	fs::path avx_out;
-	fs::path avx_test_out;
-	fs::path avx512_out;
-	fs::path avx512_test_out;
-};
-
-//Should probably be an array to run the options in a proper loop
-struct opts_string
-{
-	std::string_view vdecl;
-	std::string_view svml;
-	std::string_view avx_out;
-	std::string_view avx_test_out;
-	std::string_view avx512_out;
-	std::string_view avx512_test_out;
-};
 
 struct func_str_list
 {
@@ -56,8 +35,6 @@ struct func_str_list
 };
 
 constexpr const opts_string optstr{ "vdecl-list","svml-list", "avx-out","avx-test-out","avx512-out","avx512-test-out" };
-
-
 bo_opts::options_description desc{ "Options" };
 
 void displayHelp()
@@ -128,13 +105,6 @@ func_str_list loadLists(const Opts& opts)
 	}
 	return lines;
 }
-
-enum class intrin_type_info {
-	m128i, m256i, m512i, m128, m256, m512, m128d, m256d, m512d, pm128i, pm256i, pm512i, pm128, pm256, pm512, pm128d, pm256d, pm512d, mask8, mask16, m128func, m128dfunc, undefined
-};
-enum class packed_type_info {
-	pd, ps, epi8, epi16, epi32, epi64, epu8, epu16, epu32, epu64,
-};
 
 std::map<packed_type_info, std::string_view> packed_type_name_map_info{
 	{packed_type_info::pd, "pd"},
@@ -271,64 +241,6 @@ std::map<intrin_type_info, std::string_view> intrin_func_suffix_info{
 	{intrin_type_info::m512d, "pd"}
 };
 
-template<typename C>
-std::optional<typename C::value_type::first_type> from_string(const C& con, std::string_view view)
-{
-	auto res = std::find_if(con.begin(), con.end(), [&view](const typename C::value_type elem) {return elem.second == view; });
-	if (res != con.end())
-		return res->first;
-	else
-		return std::nullopt;
-};
-template<typename C>
-std::string_view to_string(const C& con, typename C::value_type::first_type type)
-{
-	return con.find[type];
-}
-
-struct mm_intrinsics_info {
-	bool hasMask{ false };
-	bool isInversePrefix{ false };
-	bool isInverseSuffix{ false };
-	bool isIntegerFunction{ false };
-	int NumberOfParams{ 0 };
-	int NumberOfOutParams{ 1 };
-	int PackedElements{ 0 };
-	std::string FullFunctionName;
-	std::string MathFunction;
-	intrin_type_info ReturnType;
-	intrin_type_info Prefix;
-	packed_type_info Suffix;
-	std::vector<intrin_type_info> ParamList;
-
-};
-
-struct extra_assembly_info {
-	std::vector<std::string> prelude;
-	std::vector<std::string> epilogue;
-};
-
-struct vdecl_symbol_info {
-	std::string FunctionName{""};
-	std::vector<svml_definition_info*> svml_mapping;
-};
-
-struct svml_string_info {
-	std::string fullsignature;
-	std::string retval;
-	std::string prefix;
-	std::string mask;
-	std::string func;
-	std::string postfix;
-	std::string params;
-};
-struct svml_definition_info {
-	svml_string_info strinfo;
-	mm_intrinsics_info mminfo;
-	std::string svml_to_vdecl_name{ "" };
-	bool mapping_valid{ false };
-};
-
 std::ostream& operator<<(std::ostream& os, const svml_string_info& info)
 {
 	os << "SVML STRING INFO Return: " << info.retval << '\n'; 
@@ -339,11 +251,6 @@ std::ostream& operator<<(std::ostream& os, const svml_string_info& info)
 	os << "SVML STRING INFO Params: " << info.params << '\n';
 	return os;
 }
-
-struct svml_mapping_info{
-	std::vector<vdecl_symbol_info> vdecl;
-	std::vector<svml_definition_info> svml;
-};
 
 [[nodiscard]] bool is_complex_func(const std::string_view str)
 {
@@ -387,12 +294,10 @@ std::string remove_inverse_suffix(const std::string& str)
 {
 	return str.substr(0, str.size() - 3);
 }
-
 std::string remove_inverse_prefix(const std::string& str)
 {
 	return str.substr(3, str.size());
 }
-
 std::string build_vdecl_symbol_name(const mm_intrinsics_info& info)
 {
 	std::stringstream stream;
@@ -417,8 +322,7 @@ std::string build_vdecl_symbol_name(const mm_intrinsics_info& info)
 	stream << std::to_string(info.PackedElements);
 	return stream.str();
 }
-
-static const std::regex svmlanalyzerregex{ "(__[^_]+) _([^_]+)_(mask)?_?(svml_)?([^_]+)_([^_]+) ?\\(([^\\(\\)]+)\\)" };
+static const std::regex svmlanalyzerregex{ "(__[^_]+) (_([^_]+)_(mask)?_?(svml_)?([^_]+)_([^_]+)) ?\\(([^\\(\\)]+)\\)" };
 static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4}|__mmask8|__mmask16)" };
 [[nodiscard]] std::optional<svml_definition_info> analyze_svml_line(const std::string& str)
 {
@@ -427,7 +331,7 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	std::regex_search(str, m, svmlanalyzerregex);
 	if (!m.empty())
 	{
-		svml_string_info info{ m[0],m[1],m[2],m[4],m[5],m[6],m[7] };
+		svml_string_info info{ m[0],m[1],m[2],m[3],m[5],m[6],m[7],m[8] };
 		//mm_intrinsics_info{ !info.mask.empty(), };
 		//::std::cerr << info;
 
@@ -497,7 +401,6 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	}
 	return { std::nullopt };
 }
-
 [[nodiscard]] std::vector<vdecl_symbol_info> analyze_vdecl_list(std::vector<std::string>& strlist)
 {
 	std::vector<vdecl_symbol_info> symbol_info;
@@ -518,7 +421,6 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	symbol_info.shrink_to_fit();
 	return symbol_info;
 }
-
 [[nodiscard]] std::vector<svml_definition_info> analyze_svml_list(std::vector<std::string>& strlist)
 {
 	std::vector<svml_definition_info> symbol_info;
@@ -539,7 +441,6 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	symbol_info.shrink_to_fit();
 	return symbol_info;
 }
-
 [[nodiscard]] svml_mapping_info analyzeInputLists(func_str_list& list) {
 
 	auto vdeclinfo = analyze_vdecl_list(list.vdecl);
@@ -565,10 +466,10 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 	{
 		if (elem.svml_mapping.size() != 0)
 		{
-			::std::cerr << "VDECL SYMBOL: " << elem.FunctionName << " mapped to: \n";
+			::std::cerr << "Symbol:\t" << elem.FunctionName << "\t->\t";
 			for (auto& mapped : elem.svml_mapping)
-				::std::cerr << mapped << '\t';
-			::std::cerr << '\n';						
+				::std::cerr << mapped->strinfo.mmfuncname << "\t";
+			::std::cerr << "\n\n";						
 		}
 	}
 
@@ -609,7 +510,10 @@ int main(int argc,  char** argv)
 
 	auto mapping_info = analyzeInputLists(list);
 
+	svml::write_svml_intrinsics(mapping_info, opts.avx_out, opts.avx512_out);
+
 	//outputRemainingLists(list);
 
 	return EXIT_SUCCESS;
 }
+

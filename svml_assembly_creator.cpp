@@ -15,10 +15,16 @@ namespace svml
 {
 	// Register to clobber in vdecl calling convention
 	// "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
-	constexpr ::std::array<::std::string_view, 13> clobber_register = 	{
+	constexpr ::std::array<::std::string_view, 13> clobber_register_x = 	{
+		"%xmm0", "%xmm1", "%xmm2", "%xmm3",	"%xmm4", "%xmm5",
+		"%rax",	"%rcx",	"%rdx",	"%r8", "%r9", "%r10", "%r11" };  // callee saved registers
+	constexpr ::std::array<::std::string_view, 13> clobber_register_y = {
 		"%ymm0", "%ymm1", "%ymm2", "%ymm3",	"%ymm4", "%ymm5",
 		"%rax",	"%rcx",	"%rdx",	"%r8", "%r9", "%r10", "%r11" };  // callee saved registers
-	   
+	constexpr ::std::array<::std::string_view, 13> clobber_register_u = {
+		"%zmm0", "%zmm1", "%zmm2", "%zmm3",	"%zmm4", "%zmm5",
+		"%rax",	"%rcx",	"%rdx",	"%r8", "%r9", "%r10", "%r11" };  // callee saved registers
+
 	void write_svml_intrinsics(const svml_mapping_info& info, const fs::path& avxpath, const fs::path& avx512path)
 	{
 		const std::string indent = "    ";
@@ -62,7 +68,7 @@ namespace svml
 				throw std::runtime_error{ "unknown return type!" };
 				break;
 			}
-			
+			mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += elem.strinfo.mmfuncname;
 			mm_intrinsic_impl += "(";
 
@@ -84,7 +90,7 @@ namespace svml
 			}
 			mm_intrinsic_impl.erase(mm_intrinsic_impl.end() - 2); // Remove trailing ", "
 
-			mm_intrinsic_impl += ") { \n";
+			mm_intrinsic_impl += ") \n{ \n";
 
 			// define used registers
 			const auto param_count = params.size();
@@ -115,8 +121,7 @@ namespace svml
 			{	
 				if (is_pointer_type(param.type)) // that are returned values; always come first in the param list!
 				{
-					current_output_ymm_reg = (std::int16_t)reg_infos.size();
-					reg_infos.emplace_back(reg_info{ std::nullopt, param.type , current_output_ymm_reg, std::nullopt,param.name});
+					reg_infos.emplace_back(reg_info{ std::nullopt, param.type , (std::int16_t)reg_infos.size(), std::nullopt,param.name});
 				}
 				else if (is_mask_type(param.type))
 				{
@@ -127,13 +132,13 @@ namespace svml
 				{
 					if(current_input_ymm_reg < reg_infos.size())
 					{
-						auto reg_info = reg_infos.at(current_input_ymm_reg);
+						auto& reg_info = reg_infos.at(current_input_ymm_reg);
 						reg_info.intype = param.type;
 						reg_info.input_name = param.name;
 					}
 					else
 					{
-						reg_infos.emplace_back(reg_info{ param.type, std::nullopt, current_output_ymm_reg, param.name,std::nullopt });
+						reg_infos.emplace_back(reg_info{ param.type, std::nullopt, (std::int16_t)reg_infos.size(), param.name,std::nullopt });
 					}
 					++current_input_ymm_reg;
 				}
@@ -174,18 +179,23 @@ namespace svml
 
 			}
 
-
 			// define required assembly
 			mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += "asm( \n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += " \"call "+elem.svml_to_vdecl_name+" \\t\\n\" \n"; //add code
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
-			mm_intrinsic_impl += ": \n"; //Add Outputs
+			mm_intrinsic_impl += ": "; 
+			//Add Outputs
+			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
-			mm_intrinsic_impl += ": \n"; //add Inputs
+			mm_intrinsic_impl += ": "; 
+			//add Inputs
+			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
-			mm_intrinsic_impl += ": \n"; //add clobbers
+			mm_intrinsic_impl += ": ";
+			// add clobbers
+			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ")\n";
 			// return values

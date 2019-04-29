@@ -53,6 +53,10 @@ static_assert(sizeof(Vectorf4) == sizeof(__m128));
 static_assert(sizeof(Vectorf8) == sizeof(__m256));
 //static_assert(sizeof(Vectorf16) == sizeof(__m512));
 
+using Vector4i = aligned_array<int, 4, 16>;
+using Vector8i = aligned_array<int, 8, 32>;
+using Vector16i = aligned_array<int, 16, 64>;
+
 #ifdef __clang__
 extern "C"
 {
@@ -131,6 +135,56 @@ __declspec(noinline) void SinCos(Vector4& SinData, Vector4& CosData, Vector4 MyD
 	//_mm256_store_pd((double*)SinData.data(), Output2);
 	_mm256_store_pd((double*)CosData.data(), Output);
 	//auto Out3=_mm256_erfinv_pd(Input);
+}
+
+__declspec(noinline) void divtest(Vector8i& Out1, Vector8i In1, Vector8i In2)
+{
+	__m256i Input1 = _mm256_load_si256((__m256i*)In1.data());
+	__m256i Input2 = _mm256_load_si256((__m256i*)In2.data());
+	__m256i Output = _mm256_div_epi32(Input1, Input2);
+
+	_mm256_store_si256((__m256i*)Out1.data(), Output);
+}
+
+__declspec(noinline) void masktest(Vector4i& Out1, Vector4i In2, Vector4i In1)
+{
+	__m256i Input1 = _mm256_load_si256((__m256i*)In1.data());
+	__m256i Input2 = _mm256_load_si256((__m256i*)In2.data());
+	__mmask8 mask = 0b01011010;
+	__m256i Output = _mm256_mask_abs_epi64(Input1, mask, Input2);
+
+	_mm256_store_si256((__m256i*)Out1.data(), Output);
+}
+
+__declspec(noinline) void masktest(Vector8& Out1, Vector8 In2, Vector8 In1)
+{
+	__m512d Input1 = _mm512_load_pd((double*)In1.data());
+	__m512d Input2 = _mm512_load_pd((double*)In2.data());
+	__mmask16 mask = 0b0101101001011010;
+	__m512d Output = _mm512_mask_atan2_pd(Input1, mask, Input1, Input2);
+
+	_mm512_store_pd(Out1.data(), Output);
+}
+
+__declspec(noinline) void masktest2(Vector8& Out1, Vector8 In2, Vector8 In1)
+{
+	__m512d Input1 = _mm512_load_pd((double*)In1.data());
+	__m512d Input2 = _mm512_load_pd((double*)In2.data());
+	__mmask16 mask = 0b0101101001011010;
+	__m512d Output = _mm512_mask_atan2_pd(Input1, mask, Input1, Input2);
+
+	_mm512_store_pd(Out1.data(), Output);
+}
+TEST(SVML_intrinsics_m256i, divtest) {
+	Vector8i In1{ {0, 2, 4, 6, 8,10,12,16} };
+	Vector8i In2{ {1, 1, 1, 1, 1, 1, 1, 1} };
+	Vector8i OutData;
+
+	divtest(OutData, In1, In2);
+	for (auto i = 0; i < OutData.size(); ++i)
+	{
+		std::cout << "Outdata result: intrinsic vs cmath\t" << std::setw(12) << std::setprecision(7) << OutData[i] << "|\t" << std::setw(12) << In1[i]/In2[i] << '\n';
+	}
 }
 
 

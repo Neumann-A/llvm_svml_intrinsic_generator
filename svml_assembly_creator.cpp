@@ -168,7 +168,7 @@ namespace svml
 				mm_intrinsic_impl += build_regname(reg_info.reg_number);
 				mm_intrinsic_impl += " asm(\"";
 				mm_intrinsic_impl += std::string{ to_string(intrin_regprefix, type) } +"mm" + std::to_string(reg_info.reg_number);
-				mm_intrinsic_impl += "\") ";
+				mm_intrinsic_impl += "\")";
 
 				if (reg_info.intype && reg_info.input_name)
 				{
@@ -235,7 +235,7 @@ namespace svml
 
 			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
-			mm_intrinsic_impl += ")\n";
+			mm_intrinsic_impl += ");\n";
 			// return values
 			for (const auto& reg_info : boost::adaptors::reverse(reg_infos))
 			{
@@ -272,13 +272,13 @@ namespace svml
 			case intrin_type_info::m512:
 			case intrin_type_info::m512d:
 			case intrin_type_info::m512i:
-				outstream = std::ofstream{ avx512path };
+				outstream.open(avx512path, std::ios::out | std::ios::app) ;
 				break;
 			default:
-				outstream = std::ofstream{ avxpath };
+				outstream.open( avxpath , std::ios::out | std::ios::app);
 			}
 			outstream << mm_intrinsic_impl << "\n\n";
-
+			outstream.close();
 			//std::cout << mm_intrinsic_impl << '\n';
 			//std::cout << '\n';
 

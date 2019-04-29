@@ -175,8 +175,6 @@ namespace svml
 					mm_intrinsic_impl += *reg_info.input_name;
 				}
 				mm_intrinsic_impl += ";\n";
-
-
 			}
 
 			// define required assembly
@@ -186,15 +184,54 @@ namespace svml
 			mm_intrinsic_impl += " \"call "+elem.svml_to_vdecl_name+" \\t\\n\" \n"; //add code
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ": "; 
+
 			//Add Outputs
+			for (const auto& reg_info : reg_infos)
+			{
+				if (reg_info.outtype)
+				{
+					mm_intrinsic_impl += "\"=v\" ";
+					mm_intrinsic_impl += "(";
+					if (reg_info.output_name)
+						mm_intrinsic_impl += *reg_info.output_name;
+					else
+						mm_intrinsic_impl += *reg_info.input_name;
+					mm_intrinsic_impl += "), ";
+				}
+			}
+			mm_intrinsic_impl.erase(mm_intrinsic_impl.size() - 2);
+
 			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ": "; 
 			//add Inputs
+			for (const auto& reg_info : reg_infos)
+			{
+				if (reg_info.intype)
+				{
+					mm_intrinsic_impl += "\"";
+					if (reg_info.outtype)
+						mm_intrinsic_impl += std::to_string(reg_info.reg_number);
+					else
+						mm_intrinsic_impl += "v";
+					mm_intrinsic_impl += "\" ";
+					mm_intrinsic_impl += "(";
+					mm_intrinsic_impl += *reg_info.input_name;
+					mm_intrinsic_impl += "), ";
+				}
+			}
+			mm_intrinsic_impl.erase(mm_intrinsic_impl.size() - 2);
 			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ": ";
 			// add clobbers
+			for (auto elemit = clobber_register_y.begin() + reg_infos.size(); elemit < clobber_register_y.end(); elemit++)
+			{
+				mm_intrinsic_impl += *elemit;
+				mm_intrinsic_impl += ", ";
+			}
+			mm_intrinsic_impl.erase(mm_intrinsic_impl.size() - 2);
+
 			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ")\n";
@@ -225,8 +262,7 @@ namespace svml
 					mm_intrinsic_impl += ";\n";
 				}
 			}
-
-
+			
 			mm_intrinsic_impl += "}";
 			
 			std::cout << mm_intrinsic_impl << '\n';

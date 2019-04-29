@@ -215,6 +215,12 @@ namespace svml
 					assert(reg_info.reg_number == 0);
 					mm_intrinsic_impl += indent;
 					mm_intrinsic_impl += "return ";
+					if (*reg_info.outtype != *reg_info.intype)
+					{
+						mm_intrinsic_impl += "(";
+						mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
+						mm_intrinsic_impl += ")";
+					}
 					mm_intrinsic_impl += build_regname(0);
 					mm_intrinsic_impl += ";\n";
 				}

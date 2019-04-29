@@ -165,6 +165,28 @@ std::map<intrin_type_info, std::string_view> intrin_param_map_info{
 	{intrin_type_info::mask8, "__mmask8"},
 	{intrin_type_info::mask16, "__mmask16"},
 };
+std::map<intrin_type_info, std::string_view> intrin_regprefix{
+	{intrin_type_info::m128i, "x"},
+	{intrin_type_info::m256i, "y"},
+	{intrin_type_info::m512i, "z"},
+	{intrin_type_info::m128, "x"},
+	{intrin_type_info::m256, "y"},
+	{intrin_type_info::m512, "z"},
+	{intrin_type_info::m128d, "x"},
+	{intrin_type_info::m256d, "y"},
+	{intrin_type_info::m512d, "z"},
+	{intrin_type_info::pm128i, "x"},
+	{intrin_type_info::pm256i, "y"},
+	{intrin_type_info::pm512i, "z"},
+	{intrin_type_info::pm128, "x"},
+	{intrin_type_info::pm256, "y"},
+	{intrin_type_info::pm512, "z"},
+	{intrin_type_info::pm128d, "x"},
+	{intrin_type_info::pm256d, "y"},
+	{intrin_type_info::pm512d, "z"},
+	{intrin_type_info::mask8, "k"},
+	{intrin_type_info::mask16, "k"},
+};
 std::map<intrin_type_info, std::size_t> intrin_type_size_map_info{
 	{intrin_type_info::m128, sizeof(__m128)},
 	{intrin_type_info::m256, 2*sizeof(__m128)},

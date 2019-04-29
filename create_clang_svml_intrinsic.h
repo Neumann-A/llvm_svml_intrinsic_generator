@@ -55,6 +55,7 @@ extern std::map<intrin_type_info, std::string_view> intrin_param_map_info;
 extern std::map<intrin_type_info, std::size_t> intrin_type_size_map_info;
 extern std::map<intrin_type_info, std::string_view> intrin_func_prefix_info;
 extern std::map<intrin_type_info, std::string_view> intrin_func_suffix_info;
+extern std::map<intrin_type_info, std::string_view> intrin_regprefix;
 
 struct mm_intrinsics_info {
 	bool hasMask{ false };

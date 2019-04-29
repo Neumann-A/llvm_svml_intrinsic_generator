@@ -21,6 +21,7 @@ namespace svml
 	   
 	void write_svml_intrinsics(const svml_mapping_info& info, const fs::path& avxpath, const fs::path& avx512path)
 	{
+		const std::string indent = "    ";
 		for (const auto& elem : info.svml)
 		{
 			if (std::any_of(elem.mminfo.ParamList.cbegin(), elem.mminfo.ParamList.cend(),
@@ -108,7 +109,7 @@ namespace svml
 			reg_infos.emplace_back(reg_info{ elem.mminfo.ReturnType, std::nullopt, 0,std::nullopt,std::nullopt });
 
 			std::int16_t current_input_ymm_reg = 0;
-			std::int16_t current_output_ymm_reg = 1; // there is always at least 1 output so x/y/zmm0 will always be used; 
+			std::int16_t current_output_ymm_reg = 0; // there is always at least 1 output so x/y/zmm0 will always be used; 
 			//Analyze parameters
 			for (const auto& param : params)
 			{	
@@ -124,7 +125,7 @@ namespace svml
 				}
 				else
 				{
-					if(current_input_ymm_reg <= reg_infos.size()-1)
+					if(current_input_ymm_reg < reg_infos.size())
 					{
 						auto reg_info = reg_infos.at(current_input_ymm_reg);
 						reg_info.intype = param.type;
@@ -141,6 +142,7 @@ namespace svml
 			//Create Register info;
 			for (const auto& reg_info : reg_infos)
 			{
+				mm_intrinsic_impl += indent;
 				mm_intrinsic_impl += "register ";			
 
 				intrin_type_info type;
@@ -159,24 +161,32 @@ namespace svml
 
 				mm_intrinsic_impl += build_regname(reg_info.reg_number);
 				mm_intrinsic_impl += " asm(\"";
-				mm_intrinsic_impl += " \") ";
+				mm_intrinsic_impl += std::string{ to_string(intrin_regprefix, type) } +"mm" + std::to_string(reg_info.reg_number);
+				mm_intrinsic_impl += "\") ";
 
-				if (reg_info.intype)
+				if (reg_info.intype && reg_info.input_name)
 				{
-
+					mm_intrinsic_impl += " = ";
+					mm_intrinsic_impl += *reg_info.input_name;
 				}
-				mm_intrinsic_impl += ";";
+				mm_intrinsic_impl += ";\n";
 
 
 			}
 
 
 			// define required assembly
+			mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += "asm( \n";
+			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += " \"call "+elem.svml_to_vdecl_name+" \\t\\n\" \n"; //add code
+			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ": \n"; //Add Outputs
+			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ": \n"; //add Inputs
+			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ": \n"; //add clobbers
+			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ")\n";
 			// return values
 			for (const auto& reg_info : boost::adaptors::reverse(reg_infos))

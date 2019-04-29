@@ -1,5 +1,6 @@
 # Folders
-build
+*build*
+*.vs
 
 # Prerequisites
 *.d

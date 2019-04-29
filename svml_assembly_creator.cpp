@@ -6,6 +6,7 @@
 #include "svml_assembly_creator.h"
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <iterator>
 #include <boost/range/adaptor/reversed.hpp>
@@ -265,8 +266,21 @@ namespace svml
 			
 			mm_intrinsic_impl += "}";
 			
-			std::cout << mm_intrinsic_impl << '\n';
-			std::cout << '\n';
+			std::ofstream outstream;
+			switch (elem.mminfo.ReturnType)
+			{
+			case intrin_type_info::m512:
+			case intrin_type_info::m512d:
+			case intrin_type_info::m512i:
+				outstream = std::ofstream{ avx512path };
+				break;
+			default:
+				outstream = std::ofstream{ avxpath };
+			}
+			outstream << mm_intrinsic_impl << "\n\n";
+
+			//std::cout << mm_intrinsic_impl << '\n';
+			//std::cout << '\n';
 
 		}
 	}

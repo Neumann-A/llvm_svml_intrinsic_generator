@@ -112,7 +112,7 @@ namespace svml
 			
 			std::vector<reg_info> reg_infos;
 
-			reg_infos.emplace_back(reg_info{ elem.mminfo.ReturnType, std::nullopt, 0,std::nullopt,std::nullopt });
+			reg_infos.emplace_back(reg_info{ std::nullopt , elem.mminfo.ReturnType, 0,std::nullopt,std::nullopt });
 
 			std::int16_t current_input_ymm_reg = 0;
 			std::int16_t current_output_ymm_reg = 0; // there is always at least 1 output so x/y/zmm0 will always be used; 
@@ -201,7 +201,23 @@ namespace svml
 			// return values
 			for (const auto& reg_info : boost::adaptors::reverse(reg_infos))
 			{
-				
+				if (reg_info.outtype && reg_info.output_name)
+				{
+					mm_intrinsic_impl += indent;
+					mm_intrinsic_impl += "*";
+					mm_intrinsic_impl += *reg_info.output_name;
+					mm_intrinsic_impl += " = ";
+					mm_intrinsic_impl += build_regname(reg_info.reg_number);
+					mm_intrinsic_impl += ";\n";
+				}
+				else if (reg_info.outtype)
+				{
+					assert(reg_info.reg_number == 0);
+					mm_intrinsic_impl += indent;
+					mm_intrinsic_impl += "return ";
+					mm_intrinsic_impl += build_regname(0);
+					mm_intrinsic_impl += ";\n";
+				}
 			}
 
 

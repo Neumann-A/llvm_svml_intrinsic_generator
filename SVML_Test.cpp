@@ -60,63 +60,69 @@ using Vector16i = aligned_array<int, 16, 64>;
 #ifdef __clang__
 extern "C"
 {
-#define __SVML_INTRIN_PROLOG static __inline__ 
-#define __DEFAULT_FN_ATTRS512 __attribute__((__always_inline__, __nodebug__, __target__("avx512"), __min_vector_width__(512)))
-#define __DEFAULT_FN_ATTRS256 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
-#define __DEFAULT_FN_ATTRS128 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(128)))
 
-	// Default register clobbering.
-	//: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
-	// Plan
-	// _vdecl calling convention seems to mean:
-	// all values are takens as input from ymm registers (starting at 0) and results are returned from ymm registers (starting at 0)
-	// a) in asm: used registers must be removed from default clobbering list
-	// b) in asm: registers used as input and output must be linked 
-	// c) there seems to be no need to allocate extra stack space for the function call since _vdecl symbols are effectivly vectorcall
-	//	  symbols and only paramters passed on the stack or HVA arguments need extra shadow space (the svml symbols will not have so many
-	//	  parameters)
-	// d) would be good if clang would implement __vdecl calling convention as __vectorcall convention with different name mangling. 
-
-
-	__SVML_INTRIN_PROLOG __m256d __DEFAULT_FN_ATTRS256 _mm256_sin_pd(__m256d input)
-	{
-		register __m256d regymm0 asm("ymm0") = input;
-		__asm__ (
-			"call __vdecl_sin4 \t\n"
-			: [sin] "=v" (regymm0)
-			: [in] "0" (regymm0)
-			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
-		);
-		return regymm0;
-	}
-
-	__SVML_INTRIN_PROLOG __m256d __DEFAULT_FN_ATTRS256 _mm256_cos_pd(__m256d input)
-	{
-		register __m256d regymm0 asm("ymm0") = input;
-		__asm__ (
-			"call __vdecl_cos4 \t\n"
-			: [sin] "=v" (regymm0)
-			: [in] "0" (regymm0)
-			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
-		);
-		return regymm0;
-	}
-
-	__SVML_INTRIN_PROLOG __m256d __DEFAULT_FN_ATTRS256 _mm256_sincos_pd(__m256d* pcosres, __m256d input)
-	{
-		register __m256d regymm0 asm("ymm0") = input;
-		register __m256d regymm1 asm("ymm1");
-		__asm__ (//"vmovapd %in, %%ymm0 \t\n"
-			//"sub $32, %%rsp \t\n"
-			"call __vdecl_sincos4 \t\n"
-			//"add $32, %%rsp \t\n"
-			: [sin] "=v" (regymm0), [cos] "=v" (regymm1)
-			:  [in] "0" (regymm0)
-			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
-		);
-		*pcosres = regymm1;
-		return regymm0;
-	};
+#include "svml_prolog.h"
+#include "generated_code/avx_svml_intrin.h"
+#ifdef __AVX512__
+#include "generated_code/avx512_svml_intrin.h"
+#endif
+//#define __SVML_INTRIN_PROLOG static __inline__ 
+//#define __DEFAULT_FN_ATTRS512 __attribute__((__always_inline__, __nodebug__, __target__("avx512"), __min_vector_width__(512)))
+//#define __DEFAULT_FN_ATTRS256 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(256)))
+//#define __DEFAULT_FN_ATTRS128 __attribute__((__always_inline__, __nodebug__, __target__("avx"), __min_vector_width__(128)))
+//
+//	// Default register clobbering.
+//	//: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+//	// Plan
+//	// _vdecl calling convention seems to mean:
+//	// all values are takens as input from ymm registers (starting at 0) and results are returned from ymm registers (starting at 0)
+//	// a) in asm: used registers must be removed from default clobbering list
+//	// b) in asm: registers used as input and output must be linked 
+//	// c) there seems to be no need to allocate extra stack space for the function call since _vdecl symbols are effectivly vectorcall
+//	//	  symbols and only paramters passed on the stack or HVA arguments need extra shadow space (the svml symbols will not have so many
+//	//	  parameters)
+//	// d) would be good if clang would implement __vdecl calling convention as __vectorcall convention with different name mangling. 
+//
+//
+//	__SVML_INTRIN_PROLOG __m256d __DEFAULT_FN_ATTRS256 _mm256_sin_pd(__m256d input)
+//	{
+//		register __m256d regymm0 asm("ymm0") = input;
+//		__asm__ (
+//			"call __vdecl_sin4 \t\n"
+//			: [sin] "=v" (regymm0)
+//			: [in] "0" (regymm0)
+//			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+//		);
+//		return regymm0;
+//	}
+//
+//	__SVML_INTRIN_PROLOG __m256d __DEFAULT_FN_ATTRS256 _mm256_cos_pd(__m256d input)
+//	{
+//		register __m256d regymm0 asm("ymm0") = input;
+//		__asm__ (
+//			"call __vdecl_cos4 \t\n"
+//			: [sin] "=v" (regymm0)
+//			: [in] "0" (regymm0)
+//			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+//		);
+//		return regymm0;
+//	}
+//
+//	__SVML_INTRIN_PROLOG __m256d __DEFAULT_FN_ATTRS256 _mm256_sincos_pd(__m256d* pcosres, __m256d input)
+//	{
+//		register __m256d regymm0 asm("ymm0") = input;
+//		register __m256d regymm1 asm("ymm1");
+//		__asm__ (//"vmovapd %in, %%ymm0 \t\n"
+//			//"sub $32, %%rsp \t\n"
+//			"call __vdecl_sincos4 \t\n"
+//			//"add $32, %%rsp \t\n"
+//			: [sin] "=v" (regymm0), [cos] "=v" (regymm1)
+//			:  [in] "0" (regymm0)
+//			: "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
+//		);
+//		*pcosres = regymm1;
+//		return regymm0;
+//	};
 
 };
 
@@ -160,7 +166,7 @@ __declspec(noinline) void masktest(Vector8& Out1, Vector8 In2, Vector8 In1)
 {
 	__m512d Input1 = _mm512_load_pd((double*)In1.data());
 	__m512d Input2 = _mm512_load_pd((double*)In2.data());
-	__mmask16 mask = 0b0101101001011010;
+	__mmask8 mask = 0b0101101001011010;
 	__m512d Output = _mm512_mask_atan2_pd(Input1, mask, Input1, Input2);
 
 	_mm512_store_pd(Out1.data(), Output);
@@ -170,7 +176,7 @@ __declspec(noinline) void masktest2(Vector8& Out1, Vector8 In2, Vector8 In1)
 {
 	__m512d Input1 = _mm512_load_pd((double*)In1.data());
 	__m512d Input2 = _mm512_load_pd((double*)In2.data());
-	__mmask16 mask = 0b0101101001011010;
+	__mmask8 mask = 0b0101101001011010;
 	__m512d Output = _mm512_mask_atan2_pd(Input1, mask, Input1, Input2);
 
 	_mm512_store_pd(Out1.data(), Output);
@@ -186,8 +192,6 @@ TEST(SVML_intrinsics_m256i, divtest) {
 		std::cout << "Outdata result: intrinsic vs cmath\t" << std::setw(12) << std::setprecision(7) << OutData[i] << "|\t" << std::setw(12) << In1[i]/In2[i] << '\n';
 	}
 }
-
-
 
 TEST(SVML_intrinsics_m256d, sincos) {
 	constexpr const double pi = 3.141592653589793238462643383279502884197169399375;

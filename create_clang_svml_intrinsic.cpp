@@ -534,6 +534,7 @@ int main(int argc,  char** argv)
 
 	svml::write_svml_intrinsics(mapping_info, opts.avx_out, opts.avx512_out);
 
+	svml::write_svml_tests(mapping_info, opts.avx_test_out, opts.avx512_test_out);
 	//outputRemainingLists(list);
 
 	return EXIT_SUCCESS;

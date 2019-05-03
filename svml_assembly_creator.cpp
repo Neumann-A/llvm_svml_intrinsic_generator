@@ -43,7 +43,7 @@ namespace svml
 			if (std::any_of(elem.mminfo.ParamList.cbegin(), elem.mminfo.ParamList.cend(),
 				[](const auto& elem) {return is_mask_type(elem); }))
 			{
-				::std::cerr << "Masked function: " << elem.strinfo.mmfuncname<<" cannot be handled yet!\n";
+				//::std::cerr << "Masked function: " << elem.strinfo.mmfuncname<<" cannot be handled yet!\n";
 				isMasked = true;
 				auto it = std::find_if(elem.mminfo.ParamList.cbegin(), elem.mminfo.ParamList.cend(),
 					[](const auto& elem) {return is_mask_type(elem); });
@@ -332,13 +332,13 @@ namespace svml
 					}
 					else
 					{
-						std::string tmpvar{ params[mask.position + return_counter + 2].name };
+						std::string tmpvar{ params[mask.position + 1].name };
 						//First write default value:
 						mm_intrinsic_impl += indent;
 						mm_intrinsic_impl += " ";
 						mm_intrinsic_impl += tmpvar;
 						mm_intrinsic_impl += " = ";
-						mm_intrinsic_impl += params[mask.position - return_counter].name;
+						mm_intrinsic_impl += params[mask.position - return_counter - 1 ].name;
 						mm_intrinsic_impl += ";\n";
 						//Second write masked result;
 						mm_intrinsic_impl += indent;

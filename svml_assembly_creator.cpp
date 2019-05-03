@@ -31,11 +31,24 @@ namespace svml
 		const std::string indent = "    ";
 		for (const auto& elem : info.svml)
 		{
+			struct mask_info
+			{
+				std::int16_t position{ -1 };
+				intrin_type_info type;
+				std::string paramstr;
+			};
+			mask_info mask;
+
+			bool isMasked = false;
 			if (std::any_of(elem.mminfo.ParamList.cbegin(), elem.mminfo.ParamList.cend(),
 				[](const auto& elem) {return is_mask_type(elem); }))
 			{
 				::std::cerr << "Masked function: " << elem.strinfo.mmfuncname<<" cannot be handled yet!\n";
-				continue;
+				isMasked = true;
+				auto it = std::find_if(elem.mminfo.ParamList.cbegin(), elem.mminfo.ParamList.cend(),
+					[](const auto& elem) {return is_mask_type(elem); });
+				mask.position = it - elem.mminfo.ParamList.cbegin();
+				//continue;
 			}
 			if (!elem.mapping_valid)
 			{
@@ -111,6 +124,7 @@ namespace svml
 				std::optional<std::string> output_name;
 			};
 			
+
 			std::vector<reg_info> reg_infos;
 
 			reg_infos.emplace_back(reg_info{ std::nullopt , elem.mminfo.ReturnType, 0,std::nullopt,std::nullopt });
@@ -118,20 +132,25 @@ namespace svml
 			std::int16_t current_input_ymm_reg = 0;
 			std::int16_t current_output_ymm_reg = 0; // there is always at least 1 output so x/y/zmm0 will always be used; 
 			//Analyze parameters
+			bool after_mask{ !isMasked };
+
 			for (const auto& param : params)
 			{	
-				if (is_pointer_type(param.type)) // that are returned values; always come first in the param list!
+				if (is_pointer_type(param.type)) // that are returned values; always come first in the param list! Pointers are always before the mask
 				{
-					reg_infos.emplace_back(reg_info{ std::nullopt, param.type , (std::int16_t)reg_infos.size(), std::nullopt,param.name});
+					reg_infos.emplace_back(reg_info{ std::nullopt, param.type , (std::int16_t)reg_infos.size(), std::nullopt,param.name });
 				}
 				else if (is_mask_type(param.type))
 				{
-					//TODO: Handle mask types here correctly problem is i don't know how to correctly apply the mask on the inputs without using a hand written template assembly
-					//      Would be better if the Input/Output constrains would automatically apply the mask to them.  
+					after_mask = true;
+					mask.paramstr = param.name;
+					mask.type = param.type;
 				}
 				else
 				{
-					if(current_input_ymm_reg < reg_infos.size())
+					if (!after_mask) // We only need input parameters for registers after the mask value;
+						continue;
+					if(current_input_ymm_reg < reg_infos.size() )
 					{
 						auto& reg_info = reg_infos.at(current_input_ymm_reg);
 						reg_info.intype = param.type;
@@ -144,6 +163,7 @@ namespace svml
 					++current_input_ymm_reg;
 				}
 			}
+
 
 			//Create Register info;
 			for (const auto& reg_info : reg_infos)
@@ -171,9 +191,27 @@ namespace svml
 				mm_intrinsic_impl += "\")";
 
 				if (reg_info.intype && reg_info.input_name)
-				{
-					mm_intrinsic_impl += " = ";
-					mm_intrinsic_impl += *reg_info.input_name;
+				{					
+					if (isMasked)  //Masked read in
+					{
+						mm_intrinsic_impl += ";\n";
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += to_string(intrin_param_map_info, type);
+						mm_intrinsic_impl += "_maskz_load_";
+						mm_intrinsic_impl += to_string(packed_type_name_map_info, elem.mminfo.Suffix);
+						mm_intrinsic_impl += "(&";
+						mm_intrinsic_impl += build_regname(reg_info.reg_number);
+						mm_intrinsic_impl += ",";
+						mm_intrinsic_impl += mask.paramstr;
+						mm_intrinsic_impl += ",";
+						mm_intrinsic_impl += *reg_info.input_name;
+						mm_intrinsic_impl += ")";
+					}
+					else // Normal Input
+					{
+						mm_intrinsic_impl += " = ";
+						mm_intrinsic_impl += *reg_info.input_name;
+					}
 				}
 				mm_intrinsic_impl += ";\n";
 			}
@@ -236,31 +274,96 @@ namespace svml
 			mm_intrinsic_impl += "\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ");\n";
+			
 			// return values
+			int return_counter = 0;
 			for (const auto& reg_info : boost::adaptors::reverse(reg_infos))
 			{
 				if (reg_info.outtype && reg_info.output_name)
 				{
-					mm_intrinsic_impl += indent;
-					mm_intrinsic_impl += "*";
-					mm_intrinsic_impl += *reg_info.output_name;
-					mm_intrinsic_impl += " = ";
-					mm_intrinsic_impl += build_regname(reg_info.reg_number);
-					mm_intrinsic_impl += ";\n";
+					if (!isMasked) //Simple assignment;
+					{
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += "*";
+						mm_intrinsic_impl += *reg_info.output_name;
+						mm_intrinsic_impl += " = ";
+						mm_intrinsic_impl += build_regname(reg_info.reg_number);
+						mm_intrinsic_impl += ";\n";
+					}
+					else // Complex masked stores
+					{
+						//First write default value:
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += "*";
+						mm_intrinsic_impl += *reg_info.output_name;
+						mm_intrinsic_impl += " = ";
+						mm_intrinsic_impl += params[mask.position - return_counter - 1].name;
+						mm_intrinsic_impl += ";\n";
+						//Second write masked result;
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
+						mm_intrinsic_impl += "_mask_store_";
+						mm_intrinsic_impl += to_string(packed_type_name_map_info, elem.mminfo.Suffix);
+						mm_intrinsic_impl += "(";
+						mm_intrinsic_impl += *reg_info.output_name;
+						mm_intrinsic_impl += ",";
+						mm_intrinsic_impl += mask.paramstr;
+						mm_intrinsic_impl += ",";
+						mm_intrinsic_impl += build_regname(reg_info.reg_number);
+						mm_intrinsic_impl += ");\n";
+					}
+					return_counter++;
 				}
 				else if (reg_info.outtype)
 				{
 					assert(reg_info.reg_number == 0);
-					mm_intrinsic_impl += indent;
-					mm_intrinsic_impl += "return ";
-					if (*reg_info.outtype != *reg_info.intype)
+					if (!isMasked)
 					{
-						mm_intrinsic_impl += "(";
-						mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
-						mm_intrinsic_impl += ")";
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += "return ";
+						if (*reg_info.outtype != *reg_info.intype)
+						{
+							mm_intrinsic_impl += "(";
+							mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
+							mm_intrinsic_impl += ")";
+						}
+						mm_intrinsic_impl += build_regname(0);
+						mm_intrinsic_impl += ";\n";
 					}
-					mm_intrinsic_impl += build_regname(0);
-					mm_intrinsic_impl += ";\n";
+					else
+					{
+						std::string tmpvar{ params[mask.position + return_counter + 2].name };
+						//First write default value:
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += " ";
+						mm_intrinsic_impl += tmpvar;
+						mm_intrinsic_impl += " = ";
+						mm_intrinsic_impl += params[mask.position - return_counter].name;
+						mm_intrinsic_impl += ";\n";
+						//Second write masked result;
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
+						mm_intrinsic_impl += "_mask_store_";
+						mm_intrinsic_impl += to_string(packed_type_name_map_info, elem.mminfo.Suffix);
+						mm_intrinsic_impl += "(&";
+						mm_intrinsic_impl += tmpvar;
+						mm_intrinsic_impl += ",";
+						mm_intrinsic_impl += mask.paramstr;
+						mm_intrinsic_impl += ",";
+						mm_intrinsic_impl += build_regname(0);
+						mm_intrinsic_impl += ");\n";
+
+						mm_intrinsic_impl += indent;
+						mm_intrinsic_impl += "return ";
+						if (*reg_info.outtype != *reg_info.intype)
+						{
+							mm_intrinsic_impl += "(";
+							mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
+							mm_intrinsic_impl += ")";
+						}
+						mm_intrinsic_impl += tmpvar;
+						mm_intrinsic_impl += ";\n";
+					}
 				}
 			}
 			
@@ -278,6 +381,7 @@ namespace svml
 				outstream.open( avxpath , std::ios::out | std::ios::app);
 			}
 			outstream << mm_intrinsic_impl << "\n\n";
+			outstream << std::endl;
 			outstream.close();
 			//std::cout << mm_intrinsic_impl << '\n';
 			//std::cout << '\n';

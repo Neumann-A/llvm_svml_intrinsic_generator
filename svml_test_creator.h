@@ -16,10 +16,9 @@
 
 #include "create_clang_svml_intrinsic.h"
 
-namespace svml
-{
-	template <typename T, ::std::size_t N, std::size_t align = ::std::alignment_of_v< T>>
-	struct alignas(align) aligned_array : ::std::array<T, N> {};
+namespace svml {
+	void write_svml_tests(const svml_mapping_info& info, const fs::path& avxtestfile, const fs::path& avx512testfile);
+
 }
 
 #endif	// INC_svml_test_creator_H

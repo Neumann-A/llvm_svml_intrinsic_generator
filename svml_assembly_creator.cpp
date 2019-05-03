@@ -14,6 +14,7 @@
 
 namespace svml
 {
+	const std::string indent = "    ";
 	// Register to clobber in vdecl calling convention
 	// "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%ymm0", "%ymm1", "%ymm2", "%ymm3", "%ymm4", "%ymm5"
 	constexpr ::std::array<::std::string_view, 13> clobber_register_x = 	{
@@ -28,7 +29,7 @@ namespace svml
 
 	void write_svml_intrinsics(const svml_mapping_info& info, const fs::path& avxpath, const fs::path& avx512path)
 	{
-		const std::string indent = "    ";
+
 		for (const auto& elem : info.svml)
 		{
 			struct mask_info
@@ -43,12 +44,10 @@ namespace svml
 			if (std::any_of(elem.mminfo.ParamList.cbegin(), elem.mminfo.ParamList.cend(),
 				[](const auto& elem) {return is_mask_type(elem); }))
 			{
-				//::std::cerr << "Masked function: " << elem.strinfo.mmfuncname<<" cannot be handled yet!\n";
 				isMasked = true;
 				auto it = std::find_if(elem.mminfo.ParamList.cbegin(), elem.mminfo.ParamList.cend(),
 					[](const auto& elem) {return is_mask_type(elem); });
 				mask.position = it - elem.mminfo.ParamList.cbegin();
-				//continue;
 			}
 			if (!elem.mapping_valid)
 			{

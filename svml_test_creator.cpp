@@ -26,7 +26,7 @@ namespace svml
 		res += ", ";
 		for (auto& param : info.mminfo.ParamList)
 		{
-			if (is_mask_type())
+			if (is_mask_type(param))
 			{
 
 			}

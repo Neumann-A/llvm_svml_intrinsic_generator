@@ -381,8 +381,8 @@ static const std::regex svmlanalyzerparams{ "(__m[0-9id]{3,4} \\*|__m[0-9id]{3,4
 
 		while(pos < info.params.size())
 		{
-			pos = info.params.find(',', lastpos);
-			auto substr = info.params.substr(lastpos, pos-1);
+			pos = info.params.find_first_of(',', lastpos);
+			auto substr = info.params.substr(lastpos, pos-lastpos);
 			lastpos = pos+1;
 			std::regex_search(substr, m2, svmlanalyzerparams);
 			if (!m2.empty() && m2.size() > 1)

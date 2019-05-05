@@ -10,11 +10,22 @@
 #include <iostream>
 namespace svml
 {
+	struct test_param_info
+	{
+		std::string test_type;
+		std::string param_name;
+		intrin_type_info intrin_type;
+		std::string test;
+	};
+
+	std::vector<test_param_info> params;
+
 	const std::string indent = "    ";
 	std::string  write_test_helper_function(const svml_definition_info& info)
 	{
 		std::string res;
 		
+		//Function declration
 		res += "__declspec(noinline) void helper_";
 		res += info.strinfo.mmfuncname;
 		res += "(";
@@ -22,6 +33,8 @@ namespace svml
 		res += "Vector";
 		res += std::to_string(info.mminfo.PackedElements);
 		res += to_string(packed_type_name_map_info, info.mminfo.Suffix);
+
+		res += " &ret";
 
 		res += ", ";
 		for (auto& param : info.mminfo.ParamList)
@@ -35,8 +48,21 @@ namespace svml
 
 			}
 		}
-		res += ")";
+		res += ")\n";
 
+		//Function implementation
+		res += "{\n";
+		
+		//Function prologue
+		res += indent;
+
+		//Intrinsic call
+		res += indent;
+
+		//Function epilogue
+		res += indent;
+
+		res += "}\n";
 
 	}
 	std::string  write_test(const svml_definition_info& info)

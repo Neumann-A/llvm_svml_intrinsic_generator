@@ -142,5 +142,31 @@ auto rd_fp = [&]() {return (double)mt64() / (double)mt64(); };
 
 using namespace std;
 
+constexpr const long double pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647;
+constexpr const long double div_pi_180 = 180.0 / pi;
+
+template <typename T>
+auto rem(T&& val1, T&& val2) { return std::remainder(val1, val2); };
+
+template <typename T>
+auto sind(T&& val1) { return std::sin(val1* div_pi_180); };
+
+template <typename T>
+auto cosd(T&& val1) { return std::cos(val1* div_pi_180); };
+
+template <typename T>
+auto tand(T&& val1) { return std::tan(val1 * div_pi_180); };
+
+template <typename T>
+auto sincos(T&& val1) { return std::sin(val1); };
+
+template <typename T>
+auto sincos1(T&& val1) { return std::cos(val1); };
+
+template <typename T>
+auto divrem(T&& val1, T&& val2) { return std::div(val1, val2); };
+
+template <typename T>
+auto divrem1(T&& val1, T&& val2) { return std::remainder(val1, val2); };
 #endif	// INC_svml_test_definitions_H
 // end of svml_test_definitions.h

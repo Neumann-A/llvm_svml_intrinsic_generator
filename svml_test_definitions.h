@@ -20,6 +20,9 @@
 #include <cstdint>
 #include <type_traits>
 #include <array>
+#include <random>
+#include <cmath>
+#include <algorithm>
 
 //define aligned array type to workaround clang-cl bug not aligning array properly even with alignas
 template <typename T, ::std::size_t N, std::size_t align = ::std::alignment_of_v< T>>
@@ -130,6 +133,14 @@ static_assert(std::alignment_of_v< Vector4epu64 > == std::alignment_of_v< __m256
 using Vector8epu64 = aligned_array<std::uint64_t, 8, 64>;
 static_assert(sizeof(Vector8epu64) == sizeof(__m512i));
 static_assert(std::alignment_of_v< Vector8epu64 > == std::alignment_of_v< __m512i >);
+
+
+static std::random_device rd{};
+static std::mt19937_64    mt64{0};
+
+auto rd_fp = [&]() {return (double)mt64() / (double)mt64(); };
+
+using namespace std;
 
 #endif	// INC_svml_test_definitions_H
 // end of svml_test_definitions.h

@@ -214,13 +214,56 @@ namespace svml
 		}
 
 		res += "\n";
-		res += "}\n";
+		res += "}\n\n";
 
 		return res;
 	}
 	std::string  write_test(const svml_definition_info& info)
 	{
 		std::string res;
+		std::vector<test_param_info> params;
+
+		params.push_back(test_param_info{ build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix), "Result", info.mminfo.ReturnType });
+		for (auto& param : info.mminfo.ParamList)
+		{
+			std::string param_name{ "param_" };
+			std::string param_type;
+			param_name += std::to_string(params.size());
+			if (is_mask_type(param)) //Mask
+			{
+				param_type = "std::int";
+				param_type += std::to_string(info.mminfo.PackedElements);
+				param_type = "_t ";
+			}
+			else if (is_pointer_type(param)) //Second Output
+			{
+				param_type = build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix);
+			}
+			else //Input
+			{
+				param_type = build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix);
+			}
+			params.push_back({ param_type , param_name , param });
+		}
+
+		res += "TEST(SVML_intrinsics";
+		res += info.strinfo.retval;
+		res += ", test";
+		res += info.strinfo.mmfuncname;
+		res += ") {\n";
+
+		//Initial Inputs
+
+		//do the function call
+		res += indent;
+		res += "helper_";
+		res += info.strinfo.mmfuncname;
+		res += "(";
+		
+		res += ");\n";
+
+		//Do the test;
+		res += "}\n\n";
 		return res;
 	}
 	void write_svml_tests(const svml_mapping_info& info, const fs::path& avxtestfile, const fs::path& avx512testfile)
@@ -234,6 +277,7 @@ namespace svml
 			}
 
 			auto out = write_test_helper_function(elem);
+			out = write_test(elem);
 			std::cout << out;
 		}
 	}

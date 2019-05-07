@@ -43,8 +43,8 @@ target_link_libraries(SVML_FirstTry PRIVATE GTest::GTest GTest::Main)
 target_compile_options(SVML_FirstTry PRIVATE "/MT$<$<CONFIG:Debug>:d>;/arch:AVX;/Oy;/Z7;/sdl-;/GS-;-flto;-fwhole-program-vtables")
 
 ##---------------------------------------------------------------------------------------##
-add_executable(SVML_Tests svml_test_definitions.h)
+add_executable(SVML_Tests svml_test_definitions.h generated_code/avx512_svml_test.cpp generated_code/avx_svml_test.cpp)
 set_target_properties(SVML_Tests PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_features(SVML_Tests PRIVATE cxx_std_17)
 target_link_libraries(SVML_Tests PRIVATE GTest::GTest GTest::Main)
-target_compile_options(SVML_Tests PRIVATE "/MT$<$<CONFIG:Debug>:d>;/arch:AVX;")
+target_compile_options(SVML_Tests PRIVATE "/MT$<$<CONFIG:Debug>:d>;/arch:AVX512;")

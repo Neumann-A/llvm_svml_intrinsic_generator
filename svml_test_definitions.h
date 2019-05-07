@@ -14,7 +14,6 @@
 ///---------------------------------------------------------------------------------------------------
 
 //Just to see the extra definitions
-#define __AVX512__
 
 #include <immintrin.h>
 #include <cstdint>
@@ -23,6 +22,8 @@
 #include <random>
 #include <cmath>
 #include <algorithm>
+#include <gtest/gtest.h>
+#include <complex>
 
 //define aligned array type to workaround clang-cl bug not aligning array properly even with alignas
 template <typename T, ::std::size_t N, std::size_t align = ::std::alignment_of_v< T>>
@@ -31,13 +32,13 @@ struct alignas(align) aligned_array : ::std::array<T, N> {};
 //List of required types:
 // pd, ps, epi8, epi16, epi32, epi64, epu8, epu16, epu32, epu64,
 //std::int8_t vectors
-using Vector2pd = aligned_array<std::int8_t, 2, 16>;
+using Vector2pd = aligned_array<double, 2, 16>;
 static_assert(sizeof(Vector2pd) == sizeof(__m128d));
 static_assert(std::alignment_of_v< Vector2pd > == std::alignment_of_v< __m128d >);
-using Vector4pd = aligned_array<std::int8_t, 4, 32>;
+using Vector4pd = aligned_array<double, 4, 32>;
 static_assert(sizeof(Vector4pd) == sizeof(__m256d));
 static_assert(std::alignment_of_v< Vector4pd > == std::alignment_of_v< __m256d >);
-using Vector8pd = aligned_array<std::int8_t, 8, 64>;
+using Vector8pd = aligned_array<double, 8, 64>;
 static_assert(sizeof(Vector8pd) == sizeof(__m512d));
 static_assert(std::alignment_of_v< Vector8pd > == std::alignment_of_v< __m512d >);
 
@@ -140,7 +141,7 @@ static std::mt19937_64    mt64{0};
 
 auto rd_fp = [&]() {return (double)mt64() / (double)mt64(); };
 
-using namespace std;
+//using namespace std;
 
 constexpr const long double pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647;
 constexpr const long double div_pi_180 = 180.0 / pi;
@@ -149,24 +150,89 @@ template <typename T>
 auto rem(T&& val1, T&& val2) { return std::remainder(val1, val2); };
 
 template <typename T>
-auto sind(T&& val1) { return std::sin(val1* div_pi_180); };
+auto sind(T&& val1) -> std::decay_t<T> { return std::sin(val1* (std::decay_t<T>)div_pi_180); };
 
 template <typename T>
-auto cosd(T&& val1) { return std::cos(val1* div_pi_180); };
+auto cosd(T&& val1) -> std::decay_t<T> { return std::cos(val1* (std::decay_t<T>)div_pi_180); };
 
 template <typename T>
-auto tand(T&& val1) { return std::tan(val1 * div_pi_180); };
+auto tand(T&& val1) -> std::decay_t<T> { return std::tan(val1 * (std::decay_t<T>)div_pi_180); };
 
 template <typename T>
-auto sincos(T&& val1) { return std::sin(val1); };
+auto sincos(T&& val1) -> std::decay_t<T> { return std::sin(val1); };
 
 template <typename T>
-auto sincos1(T&& val1) { return std::cos(val1); };
+auto sincos1(T&& val1) -> std::decay_t<T> { return std::cos(val1); };
+
+//template <typename T>
+//auto div(T&& val1, T&& val2) { return div((std::decay_t<T>)val1, val2); };
 
 template <typename T>
-auto divrem(T&& val1, T&& val2) { return std::div(val1, val2); };
+auto divrem(T&& val1, T&& val2) { return div((std::decay_t<T>)val1, val2).quot; };
 
 template <typename T>
 auto divrem1(T&& val1, T&& val2) { return std::remainder(val1, val2); };
+
+template <typename T, typename U>
+auto div(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::div(val1,val2).quot;
+	return def1;
+}
+template <typename T, typename U>
+auto rem(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::remainder(val1, val2);
+	return def1;
+}
+
+auto div(std::uint16_t val1, std::uint16_t val2)
+{
+	return std::div((std::int32_t)val1, (std::int32_t)val2);
+}
+
+auto div(std::uint32_t val1, std::uint32_t val2)
+{
+	return std::div((std::int64_t)val1, (std::int64_t)val2);
+}
+
+//This could probably generate worng results
+auto div(std::uint64_t val1, std::uint64_t val2)
+{
+	struct ret { std::uint64_t quot; };
+	return ret{ val1 / val2 };
+}
+
+template<typename T>
+auto cdfnorm(T&& val1) -> std::decay_t<T>
+{
+	return (std::decay_t<T>)0;
+}
+
+template<typename T> 
+auto cexp(T&& val1) -> std::decay_t<T>
+{
+	return (std::decay_t<T>)0;
+}
+
+template<typename T>
+auto clog(T&& val1) -> std::decay_t<T>
+{
+	return (std::decay_t<T>)0;
+}
+
+template<typename T>
+auto csqrt(T&& val1) -> std::decay_t<T>
+{
+	return (std::decay_t<T>)0;
+}
+
+template<typename T>
+auto exp10(T&& val1) -> std::decay_t<T>
+{
+	return (std::decay_t<T>)0;
+}
 #endif	// INC_svml_test_definitions_H
 // end of svml_test_definitions.h

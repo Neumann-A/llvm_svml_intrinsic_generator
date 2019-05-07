@@ -110,6 +110,7 @@ struct svml_mapping_info {
 [[nodiscard]] bool is_pointer_type(intrin_type_info type);
 [[nodiscard]] bool is_mask_type(intrin_type_info type);
 [[nodiscard]] bool is_interger_func(packed_type_info type);
+[[nodiscard]] bool is_complex_func(const std::string_view str);
 
 template<typename C>
 std::optional<typename C::value_type::first_type> from_string(const C& con, std::string_view view)

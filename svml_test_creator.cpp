@@ -8,6 +8,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 namespace svml
 {
 
@@ -47,11 +48,12 @@ namespace svml
 		res += info.strinfo.mmfuncname;
 		res += "(";
 		
-		res += build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix);
+		auto packed_elements = is_complex_func(info.mminfo.MathFunction) ? info.mminfo.PackedElements*2 : info.mminfo.PackedElements;
+		res += build_packed_type(packed_elements, info.mminfo.Suffix);
 
 		res += " &ret";
 		
-		return_info = test_param_info{ build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix), "ret", info.mminfo.ReturnType };
+		return_info = test_param_info{ build_packed_type(packed_elements, info.mminfo.Suffix), "ret", info.mminfo.ReturnType };
 
 		res += ", ";
 		for (auto& param : info.mminfo.ParamList)
@@ -62,19 +64,22 @@ namespace svml
 			if (is_mask_type(param)) //Mask
 			{
 				param_type = "std::int";
-				param_type += std::to_string(info.mminfo.PackedElements);
+				param_type += std::to_string(packed_elements);
 				param_type += "_t ";
+				res += "const ";
+				res += param_type;
+				res += " &";
 			}
 			else if(is_pointer_type(param)) //Second Output
 			{
-				param_type = build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix);
+				param_type = build_packed_type(packed_elements, info.mminfo.Suffix);
 				res += param_type;
 				res += " &";
 			}
 			else //Input
 			{
 				res +="const ";
-				param_type = build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix);
+				param_type = build_packed_type(packed_elements, info.mminfo.Suffix);
 				res += param_type;
 				res += " &";
 			}
@@ -102,14 +107,15 @@ namespace svml
 			if (is_mask_type(param.intrin_type)) // Mask value
 			{
 				res += m_name;
-				res += " = _load_mask";
-				res += std::to_string(info.mminfo.PackedElements);
+				res += " = ";
+				//res += " = _load_mask";
+				//res += std::to_string(info.mminfo.PackedElements);
 				res += "(";
 				res += "(";
 				res += to_string(intrin_param_map_info, param.intrin_type);
-				res += "*)&";
+				res += ")(";
 				res += param.param_name;
-				res += ")";		
+				res += "))";		
 			}
 			else if (is_pointer_type(param.intrin_type)) // Output type
 			{
@@ -123,7 +129,7 @@ namespace svml
 				{
 					res += " = ";
 					//res += func_prefix;
-					res += "(";
+					res += "*(";
 					res += to_string(intrin_param_map_info, param.intrin_type);
 					res += "*) &";
 					res += param.param_name;
@@ -181,7 +187,7 @@ namespace svml
 		}
 		else
 		{
-			res += "*ret.data() =  (decltype(ret)::value_type)m_ret;\n";
+			res += "*ret.data() =  *(std::decay_t<decltype(ret)>::value_type*)&m_ret;\n";
 		}
 
 		for (auto& param : m_params)
@@ -205,9 +211,9 @@ namespace svml
 				{
 					res += "*";
 					res += param.linked_test_info.param_name;
-					res += ".data() = (decltype(";
+					res += ".data() = *(std::decay_t<decltype(";
 					res += param.linked_test_info.param_name;
-					res += ")::value_type)";
+					res += ")>::value_type*)&";
 					res += param.intrin_param_name;
 					res += ";\n";
 				}
@@ -223,28 +229,29 @@ namespace svml
 	{
 		std::string res;
 		std::vector<test_param_info> params;
-
-		params.push_back(test_param_info{ build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix), "Result", info.mminfo.ReturnType , true});
+		auto packed_elements = is_complex_func(info.mminfo.MathFunction) ? info.mminfo.PackedElements * 2 : info.mminfo.PackedElements;
+		params.push_back(test_param_info{ build_packed_type(packed_elements, info.mminfo.Suffix), "Result", info.mminfo.ReturnType , true});
 		for (auto& param : info.mminfo.ParamList)
 		{
 			bool is_Output = false;
 			std::string param_name{ "param_" };
 			std::string param_type;
 			param_name += std::to_string(params.size());
+			
 			if (is_mask_type(param)) //Mask
 			{
 				param_type = "std::int";
-				param_type += std::to_string(info.mminfo.PackedElements);
+				param_type += std::to_string(packed_elements);
 				param_type += "_t ";
 			}
 			else if (is_pointer_type(param)) //Second Output
 			{
-				param_type = build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix);
+				param_type = build_packed_type(packed_elements, info.mminfo.Suffix);
 				is_Output = true;
 			}
 			else //Input
 			{
-				param_type = build_packed_type(info.mminfo.PackedElements, info.mminfo.Suffix);
+				param_type = build_packed_type(packed_elements, info.mminfo.Suffix);
 			}
 			params.push_back({ param_type , param_name , param ,is_Output });
 		}
@@ -283,7 +290,22 @@ namespace svml
 					res += param.param_name;
 					res += ".begin(),";
 					res += param.param_name;
-					res += ".end(), []() { return rd_fp(); })";
+					if (info.mminfo.isIntegerFunction)
+					{
+						res += ".end(), []() { return ";
+						res += "(typename ";
+						res += param.param_type;
+						res += "::value_type)";
+						res += "mt64(); })";
+					}
+					else
+					{
+						res += ".end(), []() { return ";
+						res += "(typename ";
+						res += param.param_type;
+						res += "::value_type)";
+						res += "rd_fp(); })";
+					}
 				}
 			}
 
@@ -306,7 +328,7 @@ namespace svml
 
 		//Do the test;
 		res += indent;
-		res += "for(int counter = 0; counter < Result.size(), counter++) {\n";
+		res += "for(int i = 0; i < Result.size(); i++) {\n";
 		int outnumber = 0;
 		for (auto& param : params)
 		{
@@ -346,9 +368,14 @@ namespace svml
 						if (is_mask_type(elem.intrin_type))
 						{
 							res += elem.param_name;
+							res += " >> ";
+							res += " i ";
 						}
 						else
 						{
+							res += "(typename ";
+							res += elem.param_type;
+							res += "::value_type)";
 							res += elem.param_name;
 							res += "[i]";
 						}
@@ -358,6 +385,8 @@ namespace svml
 				res.erase(res.end() - 2, res.end());
 				res += ")";
 
+				if (info.mminfo.MathFunction == "div" && !info.mminfo.hasMask)
+					res += ".quot";
 				res += "); \n";
 				outnumber++;
 			}
@@ -376,6 +405,28 @@ namespace svml
 	}
 	void write_svml_tests(const svml_mapping_info& info, const fs::path& avxtestfile, const fs::path& avx512testfile)
 	{
+		std::string inc{ "#include \"../svml_test_definitions.h\"\n" };
+		std::ofstream outstream;
+
+		outstream.open(avx512testfile, std::ios::out | std::ios::app);
+		outstream << inc << std::endl;
+		outstream << "#ifdef __AVX512__\n\n";
+		outstream << "#ifdef __clang__\n";
+		outstream << "#include \"../svml_prolog.h\"\n";
+		outstream << "#include \"avx512_svml_intrin.h\"\n" << std::endl;
+		outstream << "#endif\n";
+		outstream.close();
+
+		outstream.open(avxtestfile, std::ios::out | std::ios::app);
+
+		outstream << inc << std::endl;
+		outstream << "#ifdef __clang__\n";
+		outstream << "#include \"../svml_prolog.h\"\n";
+		outstream << "#include \"avx_svml_intrin.h\"\n";
+		outstream << "#endif\n";
+		//outstream << "#include \"avx_svml_intrin.h\"\n" << std::endl;
+		outstream.close();
+
 		for (const auto& elem : info.svml)
 		{
 			if (!elem.mapping_valid)
@@ -383,11 +434,29 @@ namespace svml
 				::std::cerr << "No valid mapping for: " << elem.strinfo.mmfuncname << "! Not generating test"<<"\n";
 				continue;
 			}
-
+			
 			auto out = write_test_helper_function(elem);
-			out = write_test(elem);
-			std::cout << out;
+			out += write_test(elem);
+
+			std::ofstream outstream;
+			switch (elem.mminfo.ReturnType)
+			{
+			case intrin_type_info::m512:
+			case intrin_type_info::m512d:
+			case intrin_type_info::m512i:
+				outstream.open(avx512testfile, std::ios::out | std::ios::app);
+				break;
+			default:
+				outstream.open(avxtestfile, std::ios::out | std::ios::app);
+			}
+			outstream << out << "\n\n";
+			outstream << std::endl;
+			outstream.close();
 		}
+
+		outstream.open(avx512testfile, std::ios::out | std::ios::app);
+		outstream << "#endif" << std::endl;
+		outstream.close();
 	}
 
 

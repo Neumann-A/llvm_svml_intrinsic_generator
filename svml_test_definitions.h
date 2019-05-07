@@ -249,9 +249,47 @@ inline auto div(std::uint64_t val1, std::uint64_t val2)
 }
 
 template<typename T>
+auto erfinv(T&& val1) -> std::decay_t<T>
+{
+	constexpr int k_max = 100;
+	if (abs(val1) < 1.0)
+	{
+		using fp = std::decay_t<T>;
+		fp res{ 0 };
+		std::array<fp, k_max> c;
+		fp sqrtpi{ sqrt((fp)pi) };
+		c[0] = 1L;
+		res += pow(sqrtpi * 0.5L * val1, 1);
+		for (int k = 1; k < k_max; k++)
+		{
+			c[k] = 0;
+			for (int m = 0; m <= k - 1; m++)
+				c[k] += c[m] * c[k - 1 - m] / ((m + 1.0L)*(2.0L*m + 1.0L));
+			res += c[k]/(2.0L*k+1.0L)*pow(sqrtpi*0.5L*val1,2*k+1);
+		}
+		return res;
+
+	}
+	//	return (std::decay_t<T>)1.0/2.0*sqrt((std::decay_t<T>)pi)*(val1+pi/12.0*pow(val1,3)+ 7.0*pi*pi/480.0*pow(val1, 5)+ 127.0*pi * pi * pi /40320.0*pow(val1, 7)+ 4369.0*pi*pi * pi *pi /5806080.0*pow(val1, 9)+ 34807.0*pi* pi * pi * pi * pi /182476800.0*pow(val1, 11));
+	return NAN;
+}
+
+template<typename T>
+auto erfcinv(T&& val1) -> std::decay_t<T>
+{
+	return erfinv((std::decay_t < T>)1.0L-val1);
+}
+
+
+template<typename T>
 auto cdfnorm(T&& val1) -> std::decay_t<T>
 {
 	return (std::decay_t<T>)1.0/2.0*(1.0+erf(val1/sqrt(2)));
+}
+template<typename T>
+auto cdfnorminv(T&& val1) -> std::decay_t<T>
+{
+	return sqrt(2.0)*erfinv(2.0*val1-1);
 }
 
 template<typename T> 

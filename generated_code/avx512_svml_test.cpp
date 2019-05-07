@@ -5559,9 +5559,9 @@ TEST(SVML_intrinsics__m512, test_mm512_cdfnorminv_ps) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/cdfnorm((typename Vector16ps::value_type)param_1[i])));
+            EXPECT_TRUE(std::isnan(cdfnorminv((typename Vector16ps::value_type)param_1[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/cdfnorm((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
+            EXPECT_FLOAT_EQ(Result[i],cdfnorminv((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
         }
     }
 }
@@ -5594,9 +5594,9 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cdfnorminv_ps) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/cdfnorm((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
+            EXPECT_TRUE(std::isnan(cdfnorminv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/cdfnorm((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            EXPECT_FLOAT_EQ(Result[i],cdfnorminv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5623,9 +5623,9 @@ TEST(SVML_intrinsics__m512d, test_mm512_cdfnorminv_pd) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/cdfnorm((typename Vector8pd::value_type)param_1[i])));
+            EXPECT_TRUE(std::isnan(cdfnorminv((typename Vector8pd::value_type)param_1[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/cdfnorm((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
+            EXPECT_DOUBLE_EQ(Result[i],cdfnorminv((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
         }
     }
 }
@@ -5658,9 +5658,9 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cdfnorminv_pd) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/cdfnorm((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
+            EXPECT_TRUE(std::isnan(cdfnorminv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/cdfnorm((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            EXPECT_DOUBLE_EQ(Result[i],cdfnorminv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5943,9 +5943,9 @@ TEST(SVML_intrinsics__m512, test_mm512_erfcinv_ps) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erfc((typename Vector16ps::value_type)param_1[i])));
+            EXPECT_TRUE(std::isnan(erfcinv((typename Vector16ps::value_type)param_1[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/erfc((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
+            EXPECT_FLOAT_EQ(Result[i],erfcinv((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
         }
     }
 }
@@ -5978,9 +5978,9 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erfcinv_ps) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erfc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
+            EXPECT_TRUE(std::isnan(erfcinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/erfc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            EXPECT_FLOAT_EQ(Result[i],erfcinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6007,9 +6007,9 @@ TEST(SVML_intrinsics__m512d, test_mm512_erfcinv_pd) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erfc((typename Vector8pd::value_type)param_1[i])));
+            EXPECT_TRUE(std::isnan(erfcinv((typename Vector8pd::value_type)param_1[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/erfc((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
+            EXPECT_DOUBLE_EQ(Result[i],erfcinv((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
         }
     }
 }
@@ -6042,9 +6042,9 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erfcinv_pd) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erfc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
+            EXPECT_TRUE(std::isnan(erfcinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/erfc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            EXPECT_DOUBLE_EQ(Result[i],erfcinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6071,9 +6071,9 @@ TEST(SVML_intrinsics__m512, test_mm512_erfinv_ps) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erf((typename Vector16ps::value_type)param_1[i])));
+            EXPECT_TRUE(std::isnan(erfinv((typename Vector16ps::value_type)param_1[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/erf((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
+            EXPECT_FLOAT_EQ(Result[i],erfinv((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
         }
     }
 }
@@ -6106,9 +6106,9 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erfinv_ps) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erf((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
+            EXPECT_TRUE(std::isnan(erfinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/erf((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            EXPECT_FLOAT_EQ(Result[i],erfinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6135,9 +6135,9 @@ TEST(SVML_intrinsics__m512d, test_mm512_erfinv_pd) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erf((typename Vector8pd::value_type)param_1[i])));
+            EXPECT_TRUE(std::isnan(erfinv((typename Vector8pd::value_type)param_1[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/erf((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
+            EXPECT_DOUBLE_EQ(Result[i],erfinv((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
         }
     }
 }
@@ -6170,9 +6170,9 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erfinv_pd) {
 
     for(int i = 0; i < Result.size(); i++) {
         if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(1/erf((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
+            EXPECT_TRUE(std::isnan(erfinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/erf((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            EXPECT_DOUBLE_EQ(Result[i],erfinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }

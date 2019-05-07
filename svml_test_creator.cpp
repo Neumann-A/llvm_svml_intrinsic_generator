@@ -380,10 +380,12 @@ namespace svml
 					res += indent;
 					res += indent;
 					res += "EXPECT_TRUE(std::isnan(";
-					if (info.mminfo.isInversePrefix || info.mminfo.isInverseSuffix)
+					if (info.mminfo.isInversePrefix)
 						res += "1/";
 
 					res += info.mminfo.MathFunction;
+					if (info.mminfo.isInverseSuffix)
+						res += "inv";
 					if (outnumber > 0)
 						res += std::to_string(outnumber);
 
@@ -439,10 +441,12 @@ namespace svml
 					res += param.param_name;
 					res += "[i],";
 				}
-				if (info.mminfo.isInversePrefix || info.mminfo.isInverseSuffix)
+				if (info.mminfo.isInversePrefix)
 					res += "1/";
 				
 				res += info.mminfo.MathFunction;
+				if (info.mminfo.isInverseSuffix)
+					res += "inv";
 				if (outnumber > 0)
 					res += std::to_string(outnumber);
 

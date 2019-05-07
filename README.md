@@ -5,10 +5,10 @@ The code within this repository generates the mapping from intel svml intrinsics
 The required code to use the intrinsics is in `generated_code/avx_svml_intrin.h` and `generated_code/avx512_svml_intrin.h`
 
 __About the tests__  
-The tests for the functions ending in `*inv` fail due to numerical accuarcy. (either testvalue is not accurate enough or the intrinsic is not accurate enough/results are still quite good) 
+The tests for the functions ending in `*inv` fail due to numerical accuarcy. (either testvalue is not accurate enough or the intrinsic is not accurate enough/results are still quite good)  
 The tests for the complex functions fail because they are not correctly implement. (due to the automatic generation I assume they wouldn't fail if the tests would be correctly implemented)  
 
-AVX512 is not yet tested. Especially the masked versions might generated a bit worse code than VS2019 due to a possible extra unmasked load/store before/after the masked load/store.
+AVX512 is not yet tested. Especially the masked versions might generated a bit worse code than VS2019 due to a possible extra unmasked load/store before/after the masked load/store.  
 Since the whole code is automatically generated I assume that the unmasked AVX512 code works as expected.  
 (don't have a AVX512 system to test)
 
@@ -19,5 +19,6 @@ CMake
 gtest  
 boost::program_options  
 c++17  
+VS2019
 (You might want to change the hardcoded arch flag in the CMakeLists.txt)  
 

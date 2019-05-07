@@ -137,9 +137,14 @@ static_assert(std::alignment_of_v< Vector8epu64 > == std::alignment_of_v< __m512
 
 
 static std::random_device rd{};
-static std::mt19937_64    mt64{0};
+extern std::mt19937_64    mt64;
 
-auto rd_fp = [&]() {return (double)mt64() / (double)mt64(); };
+inline auto rd_fp()
+{
+	static std::mt19937_64    mt64{ 0 };
+	return ((double)mt64() / (double)mt64());
+}
+
 
 //using namespace std;
 
@@ -170,6 +175,10 @@ auto sincos1(T&& val1) -> std::decay_t<T> { return std::cos(val1); };
 template <typename T>
 auto divrem(T&& val1, T&& val2) { return div((std::decay_t<T>)val1, val2).quot; };
 
+inline auto divrem(std::uint16_t val1, std::uint16_t val2) { return div((std::decay_t<std::int32_t>)val1, (std::decay_t<std::int32_t>)val2).quot; };
+
+inline auto divrem(std::uint32_t val1, std::uint32_t val2) { return div((std::decay_t<std::int64_t>)val1, (std::decay_t<std::int64_t>)val2).quot; };
+
 template <typename T>
 auto divrem1(T&& val1, T&& val2) { return std::remainder(val1, val2); };
 
@@ -188,18 +197,18 @@ auto rem(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
 	return def1;
 }
 
-auto div(std::uint16_t val1, std::uint16_t val2)
+inline auto div(std::uint16_t val1, std::uint16_t val2)
 {
 	return std::div((std::int32_t)val1, (std::int32_t)val2);
 }
 
-auto div(std::uint32_t val1, std::uint32_t val2)
+inline auto div(std::uint32_t val1, std::uint32_t val2)
 {
 	return std::div((std::int64_t)val1, (std::int64_t)val2);
 }
 
 //This could probably generate worng results
-auto div(std::uint64_t val1, std::uint64_t val2)
+inline auto div(std::uint64_t val1, std::uint64_t val2)
 {
 	struct ret { std::uint64_t quot; };
 	return ret{ val1 / val2 };

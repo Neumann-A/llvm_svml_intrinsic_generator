@@ -29,6 +29,13 @@ namespace svml
 
 	void write_svml_intrinsics(const svml_mapping_info& info, const fs::path& avxpath, const fs::path& avx512path)
 	{
+		std::ofstream outstream;
+		outstream.open(avx512path, std::ios::out | std::ios::app);
+		outstream << "#include \"../svml_prolog.h\"\n\n";
+		outstream.close();
+		outstream.open(avxpath, std::ios::out | std::ios::app);
+		outstream << "#include \"../svml_prolog.h\"\n\n";
+		outstream.close();		
 
 		for (const auto& elem : info.svml)
 		{
@@ -65,17 +72,17 @@ namespace svml
 			case intrin_type_info::m128:
 			case intrin_type_info::m128d:
 			case intrin_type_info::m128i:
-				mm_intrinsic_impl += " __DEFAULT_FN_ATTRS128\n";
+				mm_intrinsic_impl += " __DEFAULT_SVML_FN_ATTRS128\n";
 				break;
 			case intrin_type_info::m256:
 			case intrin_type_info::m256d:
 			case intrin_type_info::m256i:
-				mm_intrinsic_impl += " __DEFAULT_FN_ATTRS256\n";
+				mm_intrinsic_impl += " __DEFAULT_SVML_FN_ATTRS256\n";
 				break;
 			case intrin_type_info::m512:
 			case intrin_type_info::m512d:
 			case intrin_type_info::m512i:
-				mm_intrinsic_impl += " __DEFAULT_FN_ATTRS512\n";
+				mm_intrinsic_impl += " __DEFAULT_SVML_FN_ATTRS512\n";
 				break;
 			default:
 				throw std::runtime_error{ "unknown return type!" };
@@ -101,7 +108,7 @@ namespace svml
 				params.push_back({ std::move(param_name),param });
 				mm_intrinsic_impl += ", ";
 			}
-			mm_intrinsic_impl.erase(mm_intrinsic_impl.end() - 2); // Remove trailing ", "
+			mm_intrinsic_impl.erase(mm_intrinsic_impl.end() - 2, mm_intrinsic_impl.end()); // Remove trailing ", "
 
 			mm_intrinsic_impl += ") \n{ \n";
 
@@ -180,7 +187,7 @@ namespace svml
 				mm_intrinsic_impl += to_string(intrin_param_map_info, type);
 				if (is_pointer_type(type))
 				{
-					mm_intrinsic_impl.erase(mm_intrinsic_impl.end() - 2);
+					mm_intrinsic_impl.erase(mm_intrinsic_impl.end() - 2, mm_intrinsic_impl.end());
 				}
 				mm_intrinsic_impl += " ";
 
@@ -230,10 +237,11 @@ namespace svml
 				{
 					mm_intrinsic_impl += "\"=v\" ";
 					mm_intrinsic_impl += "(";
-					if (reg_info.output_name)
-						mm_intrinsic_impl += *reg_info.output_name;
-					else
-						mm_intrinsic_impl += *reg_info.input_name;
+					mm_intrinsic_impl += build_regname(reg_info.reg_number);
+					//if (reg_info.output_name)
+					//	mm_intrinsic_impl += *reg_info.output_name;
+					//else
+					//	mm_intrinsic_impl += *reg_info.input_name;
 					mm_intrinsic_impl += "), ";
 				}
 			}
@@ -254,7 +262,7 @@ namespace svml
 						mm_intrinsic_impl += "v";
 					mm_intrinsic_impl += "\" ";
 					mm_intrinsic_impl += "(";
-					mm_intrinsic_impl += *reg_info.input_name;
+					mm_intrinsic_impl += build_regname(reg_info.reg_number);
 					mm_intrinsic_impl += "), ";
 				}
 			}
@@ -265,7 +273,9 @@ namespace svml
 			// add clobbers
 			for (auto elemit = clobber_register_y.begin() + reg_infos.size(); elemit < clobber_register_y.end(); elemit++)
 			{
+				mm_intrinsic_impl += "\"";
 				mm_intrinsic_impl += *elemit;
+				mm_intrinsic_impl += "\"";
 				mm_intrinsic_impl += ", ";
 			}
 			mm_intrinsic_impl.erase(mm_intrinsic_impl.size() - 2);
@@ -278,6 +288,7 @@ namespace svml
 			int return_counter = 0;
 			for (const auto& reg_info : boost::adaptors::reverse(reg_infos))
 			{
+
 				if (reg_info.outtype && reg_info.output_name)
 				{
 					if (!isMasked) //Simple assignment;

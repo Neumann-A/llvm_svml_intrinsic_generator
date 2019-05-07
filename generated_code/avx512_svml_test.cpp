@@ -3,7 +3,6 @@
 #ifdef __AVX512__
 
 #ifdef __clang__
-#include "../svml_prolog.h"
 #include "avx512_svml_intrin.h"
 
 #endif

@@ -412,7 +412,7 @@ namespace svml
 		outstream << inc << std::endl;
 		outstream << "#ifdef __AVX512__\n\n";
 		outstream << "#ifdef __clang__\n";
-		outstream << "#include \"../svml_prolog.h\"\n";
+		//outstream << "#include \"../svml_prolog.h\"\n";
 		outstream << "#include \"avx512_svml_intrin.h\"\n" << std::endl;
 		outstream << "#endif\n";
 		outstream.close();
@@ -421,7 +421,7 @@ namespace svml
 
 		outstream << inc << std::endl;
 		outstream << "#ifdef __clang__\n";
-		outstream << "#include \"../svml_prolog.h\"\n";
+		//outstream << "#include \"../svml_prolog.h\"\n";
 		outstream << "#include \"avx_svml_intrin.h\"\n";
 		outstream << "#endif\n";
 		//outstream << "#include \"avx_svml_intrin.h\"\n" << std::endl;

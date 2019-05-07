@@ -1,7 +1,6 @@
 #include "../svml_test_definitions.h"
 
 #ifdef __clang__
-#include "../svml_prolog.h"
 #include "avx_svml_intrin.h"
 #endif
 __declspec(noinline) void helper__mm_div_epi8(Vector16epi8 &ret, const Vector16epi8 &param_0, const Vector16epi8 &param_1)

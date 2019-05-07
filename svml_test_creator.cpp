@@ -353,7 +353,7 @@ namespace svml
 					res += param.param_name;
 					res += "[i],";
 				}
-				if (info.mminfo.isInversePrefix)
+				if (info.mminfo.isInversePrefix || info.mminfo.isInverseSuffix)
 					res += "1/";
 				
 				res += info.mminfo.MathFunction;

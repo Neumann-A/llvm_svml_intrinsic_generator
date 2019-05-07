@@ -4909,7 +4909,7 @@ TEST(SVML_intrinsics__m128, test_mm_cdfnorminv_ps) {
     helper__mm_cdfnorminv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],cdfnorm((typename Vector4ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/cdfnorm((typename Vector4ps::value_type)param_1[i])); 
     }
 }
 
@@ -4934,7 +4934,7 @@ TEST(SVML_intrinsics__m128d, test_mm_cdfnorminv_pd) {
     helper__mm_cdfnorminv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],cdfnorm((typename Vector2pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/cdfnorm((typename Vector2pd::value_type)param_1[i])); 
     }
 }
 
@@ -4959,7 +4959,7 @@ TEST(SVML_intrinsics__m256, test_mm256_cdfnorminv_ps) {
     helper__mm256_cdfnorminv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],cdfnorm((typename Vector8ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/cdfnorm((typename Vector8ps::value_type)param_1[i])); 
     }
 }
 
@@ -4984,7 +4984,7 @@ TEST(SVML_intrinsics__m256d, test_mm256_cdfnorminv_pd) {
     helper__mm256_cdfnorminv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],cdfnorm((typename Vector4pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/cdfnorm((typename Vector4pd::value_type)param_1[i])); 
     }
 }
 
@@ -5359,7 +5359,7 @@ TEST(SVML_intrinsics__m128, test_mm_erfcinv_ps) {
     helper__mm_erfcinv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erfc((typename Vector4ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erfc((typename Vector4ps::value_type)param_1[i])); 
     }
 }
 
@@ -5384,7 +5384,7 @@ TEST(SVML_intrinsics__m128d, test_mm_erfcinv_pd) {
     helper__mm_erfcinv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erfc((typename Vector2pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/erfc((typename Vector2pd::value_type)param_1[i])); 
     }
 }
 
@@ -5409,7 +5409,7 @@ TEST(SVML_intrinsics__m256, test_mm256_erfcinv_ps) {
     helper__mm256_erfcinv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erfc((typename Vector8ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erfc((typename Vector8ps::value_type)param_1[i])); 
     }
 }
 
@@ -5434,7 +5434,7 @@ TEST(SVML_intrinsics__m256d, test_mm256_erfcinv_pd) {
     helper__mm256_erfcinv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erfc((typename Vector4pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i], (typename Vector4pd::value_type)(1.0)/erfc((typename Vector4pd::value_type)param_1[i])) << "Input: " << param_1[i];
     }
 }
 
@@ -5459,7 +5459,7 @@ TEST(SVML_intrinsics__m128, test_mm_erfinv_ps) {
     helper__mm_erfinv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erf((typename Vector4ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erf((typename Vector4ps::value_type)param_1[i])); 
     }
 }
 
@@ -5484,7 +5484,7 @@ TEST(SVML_intrinsics__m128d, test_mm_erfinv_pd) {
     helper__mm_erfinv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erf((typename Vector2pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/erf((typename Vector2pd::value_type)param_1[i])); 
     }
 }
 
@@ -5509,7 +5509,7 @@ TEST(SVML_intrinsics__m256, test_mm256_erfinv_ps) {
     helper__mm256_erfinv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erf((typename Vector8ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erf((typename Vector8ps::value_type)param_1[i])); 
     }
 }
 
@@ -5534,7 +5534,7 @@ TEST(SVML_intrinsics__m256d, test_mm256_erfinv_pd) {
     helper__mm256_erfinv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erf((typename Vector4pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/erf((typename Vector4pd::value_type)param_1[i])); 
     }
 }
 

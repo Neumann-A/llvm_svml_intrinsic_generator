@@ -4934,7 +4934,7 @@ TEST(SVML_intrinsics__m512, test_mm512_cdfnorminv_ps) {
     helper__mm512_cdfnorminv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],cdfnorm((typename Vector16ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/cdfnorm((typename Vector16ps::value_type)param_1[i])); 
     }
 }
 
@@ -4965,7 +4965,7 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cdfnorminv_ps) {
     helper__mm512_mask_cdfnorminv_ps(Result, param_1, param_2, param_3);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],cdfnorm((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/cdfnorm((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])); 
     }
 }
 
@@ -4990,7 +4990,7 @@ TEST(SVML_intrinsics__m512d, test_mm512_cdfnorminv_pd) {
     helper__mm512_cdfnorminv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],cdfnorm((typename Vector8pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/cdfnorm((typename Vector8pd::value_type)param_1[i])); 
     }
 }
 
@@ -5021,7 +5021,7 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cdfnorminv_pd) {
     helper__mm512_mask_cdfnorminv_pd(Result, param_1, param_2, param_3);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],cdfnorm((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/cdfnorm((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])); 
     }
 }
 
@@ -5270,7 +5270,7 @@ TEST(SVML_intrinsics__m512, test_mm512_erfcinv_ps) {
     helper__mm512_erfcinv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erfc((typename Vector16ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erfc((typename Vector16ps::value_type)param_1[i])); 
     }
 }
 
@@ -5301,7 +5301,7 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erfcinv_ps) {
     helper__mm512_mask_erfcinv_ps(Result, param_1, param_2, param_3);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erfc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erfc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])); 
     }
 }
 
@@ -5326,7 +5326,7 @@ TEST(SVML_intrinsics__m512d, test_mm512_erfcinv_pd) {
     helper__mm512_erfcinv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erfc((typename Vector8pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/erfc((typename Vector8pd::value_type)param_1[i])); 
     }
 }
 
@@ -5357,7 +5357,7 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erfcinv_pd) {
     helper__mm512_mask_erfcinv_pd(Result, param_1, param_2, param_3);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erfc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/erfc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])); 
     }
 }
 
@@ -5382,7 +5382,7 @@ TEST(SVML_intrinsics__m512, test_mm512_erfinv_ps) {
     helper__mm512_erfinv_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erf((typename Vector16ps::value_type)param_1[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erf((typename Vector16ps::value_type)param_1[i])); 
     }
 }
 
@@ -5413,7 +5413,7 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erfinv_ps) {
     helper__mm512_mask_erfinv_ps(Result, param_1, param_2, param_3);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_FLOAT_EQ(Result[i],erf((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])); 
+        EXPECT_FLOAT_EQ(Result[i],1/erf((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])); 
     }
 }
 
@@ -5438,7 +5438,7 @@ TEST(SVML_intrinsics__m512d, test_mm512_erfinv_pd) {
     helper__mm512_erfinv_pd(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erf((typename Vector8pd::value_type)param_1[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/erf((typename Vector8pd::value_type)param_1[i])); 
     }
 }
 
@@ -5469,7 +5469,7 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erfinv_pd) {
     helper__mm512_mask_erfinv_pd(Result, param_1, param_2, param_3);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_DOUBLE_EQ(Result[i],erf((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])); 
+        EXPECT_DOUBLE_EQ(Result[i],1/erf((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])); 
     }
 }
 

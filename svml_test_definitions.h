@@ -161,7 +161,10 @@ static std::mt19937_64    mt64{};
 inline auto rd_fp()
 {
 	static std::mt19937_64    mt64_2{ 0 };
-	return ((double)mt64_2() / (double)mt64_2());
+	auto res = ((double)mt64_2() / (double)mt64_2());
+	while (std::isnan(res))
+		res = ((double)mt64_2() / (double)mt64_2());
+	return res;
 }
 
 
@@ -172,7 +175,13 @@ constexpr const long double div_pi_180 = 180.0 / pi;
 constexpr const long double pi_div_180 = pi/180.0;
 
 template <typename T>
-auto rem(T&& val1, T&& val2) { return std::remainder(val1, val2); };
+auto rem(T&& val1, T&& val2) { return div((std::decay_t<T>)val1, val2).rem; };
+
+inline auto rem(std::uint16_t val1, std::uint16_t val2) { return div((std::int32_t)val1, (std::int32_t)val2).rem; };
+
+inline auto rem(std::uint32_t val1, std::uint32_t val2) { return div((std::int64_t)val1, (std::int64_t)val2).rem; };
+
+inline auto rem(std::uint64_t val1, std::uint64_t val2) { return val1 - (val1 / val2) * val2; };
 
 template <typename T>
 auto sind(T&& val1) -> std::decay_t<T> { return std::sin(val1* (std::decay_t<T>)pi_div_180); };
@@ -195,12 +204,16 @@ auto sincos1(T&& val1) -> std::decay_t<T> { return std::cos(val1); };
 template <typename T>
 auto divrem(T&& val1, T&& val2) { return div((std::decay_t<T>)val1, val2).quot; };
 
-inline auto divrem(std::uint16_t val1, std::uint16_t val2) { return div((std::decay_t<std::int32_t>)val1, (std::decay_t<std::int32_t>)val2).quot; };
+inline auto divrem(std::uint16_t val1, std::uint16_t val2) { return div((std::int32_t)val1, (std::int32_t)val2).quot; };
 
-inline auto divrem(std::uint32_t val1, std::uint32_t val2) { return div((std::decay_t<std::int64_t>)val1, (std::decay_t<std::int64_t>)val2).quot; };
+inline auto divrem(std::uint32_t val1, std::uint32_t val2) { return div((std::int64_t)val1, (std::int64_t)val2).quot; };
 
 template <typename T>
-auto divrem1(T&& val1, T&& val2) { return std::remainder(val1, val2); };
+auto divrem1(T&& val1, T&& val2) { return div((std::decay_t<T>)val1, val2).rem; };
+
+inline auto divrem1(std::uint16_t val1, std::uint16_t val2) { return div((std::int32_t)val1, (std::int32_t)val2).rem; };
+
+inline auto divrem1(std::uint32_t val1, std::uint32_t val2) { return div((std::int64_t)val1, (std::int64_t)val2).rem; };
 
 template <typename T, typename U>
 auto div(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
@@ -230,14 +243,15 @@ inline auto div(std::uint32_t val1, std::uint32_t val2)
 //This could probably generate worng results
 inline auto div(std::uint64_t val1, std::uint64_t val2)
 {
-	struct ret { std::uint64_t quot; };
-	return ret{ val1 / val2 };
+	struct ret { std::uint64_t quot; std::uint64_t rem;
+	};
+	return ret{ val1 / val2 , val1- (val1/val2)*val2};
 }
 
 template<typename T>
 auto cdfnorm(T&& val1) -> std::decay_t<T>
 {
-	return (std::decay_t<T>)0;
+	return (std::decay_t<T>)1.0/2.0*(1.0+erf(val1/sqrt(2)));
 }
 
 template<typename T> 

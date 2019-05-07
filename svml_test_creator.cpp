@@ -127,12 +127,19 @@ namespace svml
 				res += m_name;
 				if (info.mminfo.isIntegerFunction)
 				{
-					res += " = ";
-					//res += func_prefix;
-					res += "*(";
+					res += " = _";
+					res += func_prefix;
+					res += "_load_si";
+					std::string tmp{ to_string(intrin_param_map_info, info.mminfo.ReturnType) };
+					tmp.erase(tmp.begin(), tmp.begin() + 3);
+					tmp.erase(tmp.end() - 1);
+					res += tmp;
+					res += "((";
 					res += to_string(intrin_param_map_info, param.intrin_type);
-					res += "*) &";
+					res += "*)";
 					res += param.param_name;
+					res += ".data()";
+					res += ")";
 				}
 				else
 				{
@@ -187,7 +194,20 @@ namespace svml
 		}
 		else
 		{
-			res += "*ret.data() =  *(std::decay_t<decltype(ret)>::value_type*)&m_ret;\n";
+			//res += "*ret.data() =  *(std::decay_t<decltype(ret)>::value_type*)&m_ret;\n";
+			res += "_";
+			res += func_prefix;
+			res += "_store_si";
+			std::string tmp{ to_string(intrin_param_map_info, info.mminfo.ReturnType) };
+			tmp.erase(tmp.begin(), tmp.begin() + 3);
+			tmp.erase(tmp.end() - 1);
+			res += tmp;
+			res += "((";
+			res += to_string(intrin_param_map_info, info.mminfo.ReturnType);
+			res += "*)";
+			res += "ret";
+			res += ".data()";
+			res += ", m_ret);\n";
 		}
 
 		for (auto& param : m_params)
@@ -209,13 +229,27 @@ namespace svml
 				}
 				else
 				{
-					res += "*";
+					res += "_";
+					res += func_prefix;
+					res += "_store_si";
+					std::string tmp{ to_string(intrin_param_map_info,  info.mminfo.ReturnType) };
+					tmp.erase(tmp.begin(), tmp.begin() + 3);
+					tmp.erase(tmp.end() - 1);
+					res += tmp;
+					res += "((";
+					res += to_string(intrin_param_map_info, info.mminfo.ReturnType);
+					res += "*)";
 					res += param.linked_test_info.param_name;
-					res += ".data() = *(std::decay_t<decltype(";
-					res += param.linked_test_info.param_name;
-					res += ")>::value_type*)&";
+					res += ".data(), ";
 					res += param.intrin_param_name;
-					res += ";\n";
+					res += ");\n";
+					//res += "*";
+					//res += param.linked_test_info.param_name;
+					//res += ".data() = *(std::decay_t<decltype(";
+					//res += param.linked_test_info.param_name;
+					//res += ")>::value_type*)&";
+					//res += param.intrin_param_name;
+					//res += ";\n";
 				}
 			}
 		}
@@ -336,6 +370,58 @@ namespace svml
 			{
 				res += indent;
 				res += indent;
+
+				if (!info.mminfo.isIntegerFunction)
+				{
+					res += "if(std::isnan(";
+					res += param.param_name;
+					res += "[i]))\n";
+					res += indent;
+					res += indent;
+					res += indent;
+					res += "EXPECT_TRUE(std::isnan(";
+					if (info.mminfo.isInversePrefix || info.mminfo.isInverseSuffix)
+						res += "1/";
+
+					res += info.mminfo.MathFunction;
+					if (outnumber > 0)
+						res += std::to_string(outnumber);
+
+					res += "(";
+					for (auto& elem : params)
+					{
+						if (!elem.is_Output)
+						{
+							if (is_mask_type(elem.intrin_type))
+							{
+								res += elem.param_name;
+								res += " >> ";
+								res += " i ";
+							}
+							else
+							{
+								res += "(typename ";
+								res += elem.param_type;
+								res += "::value_type)";
+								res += elem.param_name;
+								res += "[i]";
+							}
+							res += ", ";
+						}
+					}
+					res.erase(res.end() - 2, res.end());
+					res += ")";
+
+					if (info.mminfo.MathFunction == "div" && !info.mminfo.hasMask)
+						res += ".quot";
+					res += "));\n";
+					res += indent;
+					res += indent;
+					res += "else {\n";
+					res += indent;
+					res += indent;
+					res += indent;
+				}
 				switch (info.mminfo.Suffix)
 				{
 				case packed_type_info::pd:
@@ -387,7 +473,33 @@ namespace svml
 
 				if (info.mminfo.MathFunction == "div" && !info.mminfo.hasMask)
 					res += ".quot";
-				res += "); \n";
+				res += ")";
+				res += " << \"Input:\" ";
+				for (auto& elem : params)
+				{
+					if (!elem.is_Output)
+					{
+						if (is_mask_type(elem.intrin_type))
+						{
+							res += " << \";\" << ((";
+							res += elem.param_name;
+							res += ">> i) & 1)";
+						}
+						else
+						{
+							res += " << \";\" <<";
+							res += elem.param_name;
+							res += "[i]";
+						}
+					}
+				}
+				res += ";\n";
+				res += indent;
+				res += indent;
+				if (!info.mminfo.isIntegerFunction)
+				{
+					res += "}\n";
+				}
 				outnumber++;
 			}
 		}

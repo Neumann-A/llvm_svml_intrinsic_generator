@@ -224,10 +224,13 @@ namespace svml
 
 			// define required assembly
 			mm_intrinsic_impl += indent;
+			//mm_intrinsic_impl += "asm( \"sub $48, %%rsp \\t\\n\"\n";
 			mm_intrinsic_impl += "asm( \n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += " \"call "+elem.svml_to_vdecl_name+" \\t\\n\" \n"; //add code
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
+			//mm_intrinsic_impl += " \"add $48, %%rsp \\t\\n\"\n";
+			//mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += ": "; 
 
 			//Add Outputs

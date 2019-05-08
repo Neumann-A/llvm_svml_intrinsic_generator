@@ -368,17 +368,14 @@ namespace svml
 		{
 			if (param.is_Output)
 			{
-				res += indent;
-				res += indent;
+				res += indent + indent;
 
-				if (!info.mminfo.isIntegerFunction)
+				if (!info.mminfo.isIntegerFunction && !is_complex_func(info.mminfo.MathFunction))
 				{
 					res += "if(std::isnan(";
 					res += param.param_name;
 					res += "[i]))\n";
-					res += indent;
-					res += indent;
-					res += indent;
+					res += indent + indent + indent;
 					res += "EXPECT_TRUE(std::isnan(";
 					if (info.mminfo.isInversePrefix)
 						res += "1/";
@@ -417,92 +414,165 @@ namespace svml
 					if (info.mminfo.MathFunction == "div" && !info.mminfo.hasMask)
 						res += ".quot";
 					res += "));\n";
-					res += indent;
-					res += indent;
+					res += indent + indent;
 					res += "else {\n";
-					res += indent;
-					res += indent;
-					res += indent;
+					res += indent + indent + indent;
 				}
-				switch (info.mminfo.Suffix)
-				{
-				case packed_type_info::pd:
-					res += "EXPECT_DOUBLE_EQ(";
-					res += param.param_name;
-					res += "[i],";
-					break;
-				case packed_type_info::ps:
-					res += "EXPECT_FLOAT_EQ(";
-					res += param.param_name;
-					res += "[i],";
-					break;
-				default:
-					res += "EXPECT_EQ(";
-					res += param.param_name;
-					res += "[i],";
-				}
-				if (info.mminfo.isInversePrefix)
-					res += "1/";
-				
-				res += info.mminfo.MathFunction;
-				if (info.mminfo.isInverseSuffix)
-					res += "inv";
-				if (outnumber > 0)
-					res += std::to_string(outnumber);
 
-				res += "(";
-				for (auto& elem : params)
+				if (is_complex_func(info.mminfo.MathFunction))
 				{
-					if (!elem.is_Output)
+					res += "auto cres = ";
+					res += info.mminfo.MathFunction;
+					res += "(";
+					for (auto& elem : params)
 					{
-						if (is_mask_type(elem.intrin_type))
+						if (!elem.is_Output)
 						{
-							res += elem.param_name;
-							res += " >> ";
-							res += " i ";
-						}
-						else
-						{
-							res += "(typename ";
-							res += elem.param_type;
-							res += "::value_type)";
-							res += elem.param_name;
-							res += "[i]";
-						}
-						res += ", ";
-					}
-				}
-				res.erase(res.end() - 2, res.end());
-				res += ")";
-
-				if (info.mminfo.MathFunction == "div" && !info.mminfo.hasMask)
-					res += ".quot";
-				res += ")";
-				res += " << \"Input:\" ";
-				for (auto& elem : params)
-				{
-					if (!elem.is_Output)
-					{
-						if (is_mask_type(elem.intrin_type))
-						{
-							res += " << \";\" << ((";
-							res += elem.param_name;
-							res += ">> i) & 1)";
-						}
-						else
-						{
-							res += " << \";\" <<";
-							res += elem.param_name;
-							res += "[i]";
+							if (is_mask_type(elem.intrin_type))
+							{
+								res += elem.param_name;
+								res += " >> ";
+								res += " i ";
+							}
+							else
+							{
+								res += "(typename ";
+								res += elem.param_type;
+								res += "::value_type)";
+								res += elem.param_name;
+								res += "[i],";
+								res += "(typename ";
+								res += elem.param_type;
+								res += "::value_type)";
+								res += elem.param_name;
+								res += "[i+1]";
+							}
+							res += ", ";
 						}
 					}
+					res.erase(res.end() - 2, res.end());
+					res += ");\n";
+					res += indent + indent;
+
+					switch (info.mminfo.Suffix)
+					{
+					case packed_type_info::pd:
+						res += "EXPECT_DOUBLE_EQ(";
+						res += param.param_name;
+						res += "[i],cres.real);\n";
+						break;
+					case packed_type_info::ps:
+						res += "EXPECT_FLOAT_EQ(";
+						res += param.param_name;
+						res += "[i],cres.real);\n";
+						break;
+					default:
+						res += "EXPECT_EQ(";
+						res += param.param_name;
+						res += "[i],cres.real);\n";
+					}
+
+					res += indent + indent;
+
+					switch (info.mminfo.Suffix)
+					{
+					case packed_type_info::pd:
+						res += "EXPECT_DOUBLE_EQ(";
+						res += param.param_name;
+						res += "[++i],cres.imag);\n";
+						break;
+					case packed_type_info::ps:
+						res += "EXPECT_FLOAT_EQ(";
+						res += param.param_name;
+						res += "[++i],cres.imag);\n";
+						break;
+					default:
+						res += "EXPECT_EQ(";
+						res += param.param_name;
+						res += "[++i],cres.imag);\n";
+					}
 				}
-				res += ";\n";
-				res += indent;
-				res += indent;
-				if (!info.mminfo.isIntegerFunction)
+				else
 				{
-					res += "}\n";
+					switch (info.mminfo.Suffix)
+					{
+					case packed_type_info::pd:
+						res += "EXPECT_DOUBLE_EQ(";
+						res += param.param_name;
+						res += "[i],";
+						break;
+					case packed_type_info::ps:
+						res += "EXPECT_FLOAT_EQ(";
+						res += param.param_name;
+						res += "[i],";
+						break;
+					default:
+						res += "EXPECT_EQ(";
+						res += param.param_name;
+						res += "[i],";
+					}
+					if (info.mminfo.isInversePrefix)
+						res += "1/";
+
+					res += info.mminfo.MathFunction;
+					if (info.mminfo.isInverseSuffix)
+						res += "inv";
+					if (outnumber > 0)
+						res += std::to_string(outnumber);
+
+					res += "(";
+					for (auto& elem : params)
+					{
+						if (!elem.is_Output)
+						{
+							if (is_mask_type(elem.intrin_type))
+							{
+								res += elem.param_name;
+								res += " >> ";
+								res += " i ";
+							}
+							else
+							{
+								res += "(typename ";
+								res += elem.param_type;
+								res += "::value_type)";
+								res += elem.param_name;
+								res += "[i]";
+							}
+							res += ", ";
+						}
+					}
+					res.erase(res.end() - 2, res.end());
+					res += ")";
+
+					if (info.mminfo.MathFunction == "div" && !info.mminfo.hasMask)
+						res += ".quot";
+					res += ")";
+					res += " << \"Input:\" ";
+					for (auto& elem : params)
+					{
+						if (!elem.is_Output)
+						{
+							if (is_mask_type(elem.intrin_type))
+							{
+								res += " << \";\" << ((";
+								res += elem.param_name;
+								res += ">> i) & 1)";
+							}
+							else
+							{
+								res += " << \";\" <<";
+								res += elem.param_name;
+								res += "[i]";
+							}
+						}
+					}
+					res += ";\n";
+					res += indent + indent;
+					if (!info.mminfo.isIntegerFunction)
+					{
+						res += "}\n";
+					}
 				}
 				outnumber++;
 			}

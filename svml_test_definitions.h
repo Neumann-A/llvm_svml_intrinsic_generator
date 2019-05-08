@@ -293,21 +293,47 @@ auto cdfnorminv(T&& val1) -> std::decay_t<T>
 }
 
 template<typename T> 
-auto cexp(T&& val1) -> std::decay_t<T>
+auto cexp(T&& val1, T&& val2)
 {
-	return (std::decay_t<T>)0;
+	struct Res {
+		std::decay_t<T> real{ 0 };
+		std::decay_t<T> imag{ 0 };
+	}res ;
+
+	res.real += exp(val1) * cos(val2);
+	res.imag += exp(val1) * sin(val2);
+
+	return res;	
 }
 
 template<typename T>
-auto clog(T&& val1) -> std::decay_t<T>
+auto clog(T&& val1, T&& val2)
 {
-	return (std::decay_t<T>)0;
+	struct Res {
+		std::decay_t<T> real{ 0 };
+		std::decay_t<T> imag{ 0 };
+	}res;
+
+	res.real = log(sqrt(val1 * val1 + val2 * val2));
+	res.imag = ::std::atan2(val2, val1);
+
+	return res;
 }
 
 template<typename T>
-auto csqrt(T&& val1) -> std::decay_t<T>
+auto csqrt(T&& val1, T&& val2)
 {
-	return (std::decay_t<T>)0;
+	struct Res {
+		std::decay_t<T> real{ 0 };
+		std::decay_t<T> imag{ 0 };
+	}res;
+
+	res.real = sqrt((sqrt(val1*val1+val2*val2)+val1)/2.0L);
+	res.imag = sqrt((sqrt(val1 * val1 + val2 * val2) - val1) / 2.0L);
+	if (val2 < 0)
+		res.imag = -res.imag;
+
+	return res;
 }
 
 template<typename T>

@@ -5649,11 +5649,9 @@ TEST(SVML_intrinsics__m128, test_mm_cexp_ps) {
     helper__mm_cexp_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(cexp((typename Vector4ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],cexp((typename Vector4ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
+        auto cres = cexp((typename Vector4ps::value_type)param_1[i],(typename Vector4ps::value_type)param_1[i+1]);
+        EXPECT_FLOAT_EQ(Result[i],cres.real);
+        EXPECT_FLOAT_EQ(Result[++i],cres.imag);
     }
 }
 
@@ -5678,11 +5676,9 @@ TEST(SVML_intrinsics__m256, test_mm256_cexp_ps) {
     helper__mm256_cexp_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(cexp((typename Vector8ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],cexp((typename Vector8ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
+        auto cres = cexp((typename Vector8ps::value_type)param_1[i],(typename Vector8ps::value_type)param_1[i+1]);
+        EXPECT_FLOAT_EQ(Result[i],cres.real);
+        EXPECT_FLOAT_EQ(Result[++i],cres.imag);
     }
 }
 
@@ -5707,11 +5703,9 @@ TEST(SVML_intrinsics__m128, test_mm_clog_ps) {
     helper__mm_clog_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(clog((typename Vector4ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],clog((typename Vector4ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
+        auto cres = clog((typename Vector4ps::value_type)param_1[i],(typename Vector4ps::value_type)param_1[i+1]);
+        EXPECT_FLOAT_EQ(Result[i],cres.real);
+        EXPECT_FLOAT_EQ(Result[++i],cres.imag);
     }
 }
 
@@ -5736,11 +5730,9 @@ TEST(SVML_intrinsics__m256, test_mm256_clog_ps) {
     helper__mm256_clog_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(clog((typename Vector8ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],clog((typename Vector8ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
+        auto cres = clog((typename Vector8ps::value_type)param_1[i],(typename Vector8ps::value_type)param_1[i+1]);
+        EXPECT_FLOAT_EQ(Result[i],cres.real);
+        EXPECT_FLOAT_EQ(Result[++i],cres.imag);
     }
 }
 
@@ -5765,11 +5757,9 @@ TEST(SVML_intrinsics__m128, test_mm_csqrt_ps) {
     helper__mm_csqrt_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(csqrt((typename Vector4ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],csqrt((typename Vector4ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
+        auto cres = csqrt((typename Vector4ps::value_type)param_1[i],(typename Vector4ps::value_type)param_1[i+1]);
+        EXPECT_FLOAT_EQ(Result[i],cres.real);
+        EXPECT_FLOAT_EQ(Result[++i],cres.imag);
     }
 }
 
@@ -5794,11 +5784,9 @@ TEST(SVML_intrinsics__m256, test_mm256_csqrt_ps) {
     helper__mm256_csqrt_ps(Result, param_1);
 
     for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(csqrt((typename Vector8ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],csqrt((typename Vector8ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
+        auto cres = csqrt((typename Vector8ps::value_type)param_1[i],(typename Vector8ps::value_type)param_1[i+1]);
+        EXPECT_FLOAT_EQ(Result[i],cres.real);
+        EXPECT_FLOAT_EQ(Result[++i],cres.imag);
     }
 }
 

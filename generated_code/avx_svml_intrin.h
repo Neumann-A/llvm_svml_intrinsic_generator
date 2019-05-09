@@ -521,7 +521,7 @@ __SVML_INTRIN_PROLOG __m256i __DEFAULT_SVML_FN_ATTRS256
          "call __vdecl_i32divrem8 \t\n" 
         : "=v" (reg0), "=v" (reg1)
         : "0" (reg0), "1" (reg1)
-        : "%ymm2", "%ymm3", "%ymm4", "%ymm5", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11"
+        : "%ymm2", "%ymm3", "%ymm4", "%ymm5", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%rsp"
         );
     *param0 = reg1;
     return reg0;
@@ -537,7 +537,7 @@ __SVML_INTRIN_PROLOG __m256i __DEFAULT_SVML_FN_ATTRS256
          "call __vdecl_u32divrem8 \t\n" 
         : "=v" (reg0), "=v" (reg1)
         : "0" (reg0), "1" (reg1)
-        : "%ymm2", "%ymm3", "%ymm4", "%ymm5", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11"
+        : "%ymm2", "%ymm3", "%ymm4", "%ymm5", "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%rsp"
         );
     *param0 = reg1;
     return reg0;

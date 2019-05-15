@@ -32,6 +32,8 @@ namespace svml
 		std::ofstream outstream;
 		outstream.open(avx512path, std::ios::out | std::ios::app);
 		outstream << "#include \"../svml_prolog.h\"\n\n";
+		outstream << "#define _mm512_mask_load_epu32  _mm512_mask_load_epi32\n";
+		outstream << "#define _mm512_mask_store_epu32 _mm512_mask_store_epi32\n\n";
 		outstream.close();
 		outstream.open(avxpath, std::ios::out | std::ios::app);
 		outstream << "#include \"../svml_prolog.h\"\n\n";
@@ -172,6 +174,8 @@ namespace svml
 
 
 			//Create Register info;
+			// 
+			int mask_counter = 0;
 			for (const auto& reg_info : reg_infos)
 			{
 				mm_intrinsic_impl += indent;
@@ -201,17 +205,19 @@ namespace svml
 					if (isMasked)  //Masked read in
 					{
 						mm_intrinsic_impl += ";\n";
-						mm_intrinsic_impl += indent;
-						mm_intrinsic_impl += to_string(intrin_param_map_info, type);
-						mm_intrinsic_impl += "_maskz_load_";
+						mm_intrinsic_impl += indent + build_regname(reg_info.reg_number) + " = " "_";
+						mm_intrinsic_impl += to_string(intrin_func_prefix_info, type);
+						mm_intrinsic_impl += "_mask_load_";
 						mm_intrinsic_impl += to_string(packed_type_name_map_info, elem.mminfo.Suffix);
-						mm_intrinsic_impl += "(&";
-						mm_intrinsic_impl += build_regname(reg_info.reg_number);
+						mm_intrinsic_impl += "(";
+						mm_intrinsic_impl += params.at(mask.position - return_count + mask_counter).name;
 						mm_intrinsic_impl += ",";
 						mm_intrinsic_impl += mask.paramstr;
-						mm_intrinsic_impl += ",";
+						mm_intrinsic_impl += ", &";
 						mm_intrinsic_impl += *reg_info.input_name;
 						mm_intrinsic_impl += ")";
+						if(return_count - 1 < mask_counter)
+							mask_counter++;
 					}
 					else // Normal Input
 					{
@@ -226,6 +232,7 @@ namespace svml
 			mm_intrinsic_impl += indent;
 			//mm_intrinsic_impl += "asm( \"sub $48, %%rsp \\t\\n\"\n";
 			mm_intrinsic_impl += "asm( \n";
+			//mm_intrinsic_impl += "asm( \"sub $48, %%rsp \\t\\n\"\n";
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
 			mm_intrinsic_impl += " \"call "+elem.svml_to_vdecl_name+" \\t\\n\" \n"; //add code
 			mm_intrinsic_impl += indent; mm_intrinsic_impl += indent;
@@ -313,8 +320,8 @@ namespace svml
 						mm_intrinsic_impl += params[mask.position - return_counter - 1].name;
 						mm_intrinsic_impl += ";\n";
 						//Second write masked result;
-						mm_intrinsic_impl += indent;
-						mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
+						mm_intrinsic_impl += indent + "_";
+						mm_intrinsic_impl += to_string(intrin_func_prefix_info, *reg_info.outtype);
 						mm_intrinsic_impl += "_mask_store_";
 						mm_intrinsic_impl += to_string(packed_type_name_map_info, elem.mminfo.Suffix);
 						mm_intrinsic_impl += "(";
@@ -354,8 +361,8 @@ namespace svml
 						mm_intrinsic_impl += params[mask.position - return_counter - 1 ].name;
 						mm_intrinsic_impl += ";\n";
 						//Second write masked result;
-						mm_intrinsic_impl += indent;
-						mm_intrinsic_impl += to_string(intrin_param_map_info, *reg_info.outtype);
+						mm_intrinsic_impl += indent + "_";
+						mm_intrinsic_impl += to_string(intrin_func_prefix_info, *reg_info.outtype);
 						mm_intrinsic_impl += "_mask_store_";
 						mm_intrinsic_impl += to_string(packed_type_name_map_info, elem.mminfo.Suffix);
 						mm_intrinsic_impl += "(&";

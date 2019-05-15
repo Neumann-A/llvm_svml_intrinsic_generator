@@ -160,7 +160,7 @@ static std::mt19937_64    mt64{};
 
 inline auto rd_fp()
 {
-	static std::mt19937_64    mt64_2{ 0 };
+	static std::mt19937_64    mt64_2{ 15 };
 	auto res = ((double)mt64_2() / (double)mt64_2());
 	while (std::isnan(res))
 		res = ((double)mt64_2() / (double)mt64_2());
@@ -185,19 +185,52 @@ inline auto rem(std::uint64_t val1, std::uint64_t val2) { return val1 - (val1 / 
 
 template <typename T>
 auto sind(T&& val1) -> std::decay_t<T> { return std::sin(val1* (std::decay_t<T>)pi_div_180); };
-
+template <typename T, typename U>
+auto sind(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return sind(val1);
+	return def1;
+}
 template <typename T>
 auto cosd(T&& val1) -> std::decay_t<T> { return std::cos(val1* (std::decay_t<T>)pi_div_180); };
-
+template <typename T, typename U>
+auto cosd(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return cosd(val1);
+	return def1;
+}
 template <typename T>
 auto tand(T&& val1) -> std::decay_t<T> { return std::tan(val1 * (std::decay_t<T>)pi_div_180); };
+template <typename T, typename U>
+auto tand(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return tand(val1);
+	return def1;
+}
 
 template <typename T>
 auto sincos(T&& val1) -> std::decay_t<T> { return std::sin(val1); };
 
+template <typename T, typename U>
+auto sincos(T&& def1, T&& def2, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::sin(val1);
+	return def1;
+}
+
 template <typename T>
 auto sincos1(T&& val1) -> std::decay_t<T> { return std::cos(val1); };
-
+template <typename T, typename U>
+auto sincos1(T&& def1, T&& def2, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::cos(val1);
+	return def2;
+}
 //template <typename T>
 //auto div(T&& val1, T&& val2) { return div((std::decay_t<T>)val1, val2); };
 
@@ -216,10 +249,290 @@ inline auto divrem1(std::uint16_t val1, std::uint16_t val2) { return div((std::i
 inline auto divrem1(std::uint32_t val1, std::uint32_t val2) { return div((std::int64_t)val1, (std::int64_t)val2).rem; };
 
 template <typename T, typename U>
+auto log(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::log(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto log1p(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::log1p(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto log10(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::log10(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto log2(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::log2(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto logb(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::logb(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto exp(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::exp(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto exp10(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return exp10(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto exp2(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::exp2(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto expm1(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::expm1(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto trunc(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::trunc(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto floor(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::floor(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto ceil(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::ceil(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto round(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::round(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto rint(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::rint(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto pow(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::pow(val1, val2);
+	return def1;
+}
+template <typename T, typename U>
+auto fmod(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::fmod(val1, val2);
+	return def1;
+}
+template <typename T, typename U>
+auto cbrt(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return cbrt(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto sqrt(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return sqrt(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto erf(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return erf(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto erfc(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return erfc(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto erfcinv(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return erfcinv(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto erfinv(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return erfinv(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto nearbyint(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return nearbyint(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto hypot(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return hypot(val1, val2);
+	return def1;
+}
+template <typename T, typename U>
+auto cdfnorm(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return cdfnorm(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto cdfnorminv(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return cdfnorminv(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto atan(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return atan(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto atan2(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return atan2(val1,val2);
+	return def1;
+}
+template <typename T, typename U>
+auto tan(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::tan(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto tanh(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::tanh(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto atanh(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::atanh(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto sin(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::sin(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto sinh(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::sinh(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto asinh(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::asinh(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto asin(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::asin(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto cos(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::cos(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto cosh(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::cosh(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto acosh(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::acosh(val1);
+	return def1;
+}
+template <typename T, typename U>
+auto acos(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+{
+	if (mask & 1)
+		return std::acos(val1);
+	return def1;
+}
+//auto sincos(T&& def1, U&& mask, T&& val1) -> std::decay_t<T>
+//{
+//	if (mask & 1)
+//		return std::cos(val1);
+//	return def1;
+//}
+
+template <typename T, typename U>
 auto div(T&& def1, U&& mask, T&& val1, T&& val2) -> std::decay_t<T>
 {
 	if (mask & 1)
-		return std::div(val1,val2).quot;
+		return val1 / val2;//std::div((std::decay_t<T>)val1,val2).quot;
 	return def1;
 }
 template <typename T, typename U>

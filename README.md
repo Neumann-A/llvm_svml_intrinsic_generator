@@ -14,7 +14,7 @@ Since the whole code is automatically generated I assume that the unmasked AVX51
 
 *Note*: If you try to build the tests with VS2019 you will encounter an internal compile error. Try to compile the tests in smaller chuncks until the ICE vanishes.  
 In optimized builds some of the `divrem` test throw an access violation  with clang-cl. Commenting them out solves the problem and the tests run fine.  
-(I do not understand why they throw. Would be good if somebody could tell me whats wrong.).  
+(The error occours because the stack pointer is not aligned to a 16 bit boundary when calling the helper_intrinsic function. I do not know why clang-cl does not align the stack pointer properly).  
 
 
 __Requirements to build__  

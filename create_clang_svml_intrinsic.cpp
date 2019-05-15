@@ -250,6 +250,21 @@ std::map<intrin_type_info, std::string_view> intrin_func_prefix_info{
 	{intrin_type_info::m128, "mm"},
 	{intrin_type_info::m256, "mm256"},
 	{intrin_type_info::m512, "mm512"},
+	{intrin_type_info::m128i, "mm"},
+	{intrin_type_info::m256i, "mm256"},
+	{intrin_type_info::m512i, "mm512"},
+	{intrin_type_info::m128d, "mm"},
+	{intrin_type_info::m256d, "mm256"},
+	{intrin_type_info::m512d, "mm512"},
+	{intrin_type_info::pm128, "mm"},
+	{intrin_type_info::pm256, "mm256"},
+	{intrin_type_info::pm512, "mm512"},
+	{intrin_type_info::pm128i, "mm"},
+	{intrin_type_info::pm256i, "mm256"},
+	{intrin_type_info::pm512i, "mm512"},
+	{intrin_type_info::pm128d, "mm"},
+	{intrin_type_info::pm256d, "mm256"},
+	{intrin_type_info::pm512d, "mm512"}
 };
 std::map<intrin_type_info, std::string_view> intrin_func_suffix_info{
 	{intrin_type_info::m128i, ""},

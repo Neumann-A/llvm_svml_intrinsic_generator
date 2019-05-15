@@ -296,6 +296,7 @@ namespace svml
 		res += info.strinfo.mmfuncname;
 		res += ") {\n";
 
+		std::string maskname;
 		//Initial Inputs
 		for (auto& param : params)
 		{
@@ -312,6 +313,7 @@ namespace svml
 				auto elements = info.mminfo.PackedElements;
 				if (is_mask_type(param.intrin_type))
 				{
+					maskname = param.param_name;
 					res += param.param_name;
 					res += " = ";
 					res += "(std::int";
@@ -453,24 +455,19 @@ namespace svml
 					res.erase(res.end() - 2, res.end());
 					res += ");\n";
 					res += indent + indent;
-
 					switch (info.mminfo.Suffix)
 					{
 					case packed_type_info::pd:
 						res += "EXPECT_DOUBLE_EQ(";
-						res += param.param_name;
-						res += "[i],cres.real);\n";
 						break;
 					case packed_type_info::ps:
 						res += "EXPECT_FLOAT_EQ(";
-						res += param.param_name;
-						res += "[i],cres.real);\n";
 						break;
 					default:
 						res += "EXPECT_EQ(";
-						res += param.param_name;
-						res += "[i],cres.real);\n";
 					}
+					res += param.param_name;
+					res += "[i],cres.real);\n";
 
 					res += indent + indent;
 
@@ -478,38 +475,39 @@ namespace svml
 					{
 					case packed_type_info::pd:
 						res += "EXPECT_DOUBLE_EQ(";
-						res += param.param_name;
-						res += "[++i],cres.imag);\n";
 						break;
 					case packed_type_info::ps:
 						res += "EXPECT_FLOAT_EQ(";
-						res += param.param_name;
-						res += "[++i],cres.imag);\n";
 						break;
 					default:
 						res += "EXPECT_EQ(";
-						res += param.param_name;
-						res += "[++i],cres.imag);\n";
 					}
+					res += param.param_name;
+					res += "[++i],cres.imag);\n";
 				}
 				else
 				{
+					if (info.mminfo.hasMask)
+					{
+						res += "const auto mask = (" + maskname + " >> i) & 1;\n";
+						res += indent + indent;
+					}
 					switch (info.mminfo.Suffix)
 					{
 					case packed_type_info::pd:
 						res += "EXPECT_DOUBLE_EQ(";
-						res += param.param_name;
-						res += "[i],";
 						break;
 					case packed_type_info::ps:
 						res += "EXPECT_FLOAT_EQ(";
-						res += param.param_name;
-						res += "[i],";
 						break;
 					default:
 						res += "EXPECT_EQ(";
-						res += param.param_name;
-						res += "[i],";
+					}
+					res += param.param_name + "[i]";
+					res += ",";
+					if (info.mminfo.hasMask)
+					{
+						res += " !mask ? param_1[i] : ";
 					}
 					if (info.mminfo.isInversePrefix)
 						res += "1/";

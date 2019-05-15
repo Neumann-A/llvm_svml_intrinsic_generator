@@ -257,7 +257,8 @@ TEST(SVML_intrinsics__m512i, test_mm512_mask_div_epi32) {
     helper__mm512_mask_div_epi32(Result, param_1, param_2, param_3, param_4);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_EQ(Result[i],div((typename Vector16epi32::value_type)param_1[i], param_2 >>  i , (typename Vector16epi32::value_type)param_3[i], (typename Vector16epi32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+        const auto mask = (param_2 >> i) & 1;
+        EXPECT_EQ(Result[i], !mask ? param_1[i] : div((typename Vector16epi32::value_type)param_1[i], param_2 >>  i , (typename Vector16epi32::value_type)param_3[i], (typename Vector16epi32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
             }
 }
 
@@ -291,7 +292,8 @@ TEST(SVML_intrinsics__m512i, test_mm512_mask_div_epu32) {
     helper__mm512_mask_div_epu32(Result, param_1, param_2, param_3, param_4);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_EQ(Result[i],div((typename Vector16epu32::value_type)param_1[i], param_2 >>  i , (typename Vector16epu32::value_type)param_3[i], (typename Vector16epu32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+        const auto mask = (param_2 >> i) & 1;
+        EXPECT_EQ(Result[i], !mask ? param_1[i] : div((typename Vector16epu32::value_type)param_1[i], param_2 >>  i , (typename Vector16epu32::value_type)param_3[i], (typename Vector16epu32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
             }
 }
 
@@ -549,7 +551,8 @@ TEST(SVML_intrinsics__m512i, test_mm512_mask_rem_epi32) {
     helper__mm512_mask_rem_epi32(Result, param_1, param_2, param_3, param_4);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_EQ(Result[i],rem((typename Vector16epi32::value_type)param_1[i], param_2 >>  i , (typename Vector16epi32::value_type)param_3[i], (typename Vector16epi32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+        const auto mask = (param_2 >> i) & 1;
+        EXPECT_EQ(Result[i], !mask ? param_1[i] : rem((typename Vector16epi32::value_type)param_1[i], param_2 >>  i , (typename Vector16epi32::value_type)param_3[i], (typename Vector16epi32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
             }
 }
 
@@ -583,7 +586,8 @@ TEST(SVML_intrinsics__m512i, test_mm512_mask_rem_epu32) {
     helper__mm512_mask_rem_epu32(Result, param_1, param_2, param_3, param_4);
 
     for(int i = 0; i < Result.size(); i++) {
-        EXPECT_EQ(Result[i],rem((typename Vector16epu32::value_type)param_1[i], param_2 >>  i , (typename Vector16epu32::value_type)param_3[i], (typename Vector16epu32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+        const auto mask = (param_2 >> i) & 1;
+        EXPECT_EQ(Result[i], !mask ? param_1[i] : rem((typename Vector16epu32::value_type)param_1[i], param_2 >>  i , (typename Vector16epu32::value_type)param_3[i], (typename Vector16epu32::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
             }
 }
 
@@ -646,7 +650,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_sin_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sin((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],sin((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : sin((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -710,7 +715,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_sin_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sin((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],sin((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : sin((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -774,7 +780,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cos_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cos((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],cos((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : cos((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -838,7 +845,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cos_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cos((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],cos((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : cos((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -916,12 +924,14 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_sincos_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sincos((typename Vector16ps::value_type)param_2[i], (typename Vector16ps::value_type)param_3[i], param_4 >>  i , (typename Vector16ps::value_type)param_5[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],sincos((typename Vector16ps::value_type)param_2[i], (typename Vector16ps::value_type)param_3[i], param_4 >>  i , (typename Vector16ps::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
+            const auto mask = (param_4 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_2[i] : sincos((typename Vector16ps::value_type)param_2[i], (typename Vector16ps::value_type)param_3[i], param_4 >>  i , (typename Vector16ps::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
         }
         if(std::isnan(param_1[i]))
             EXPECT_TRUE(std::isnan(sincos1((typename Vector16ps::value_type)param_2[i], (typename Vector16ps::value_type)param_3[i], param_4 >>  i , (typename Vector16ps::value_type)param_5[i])));
         else {
-            EXPECT_FLOAT_EQ(param_1[i],sincos1((typename Vector16ps::value_type)param_2[i], (typename Vector16ps::value_type)param_3[i], param_4 >>  i , (typename Vector16ps::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
+            const auto mask = (param_4 >> i) & 1;
+        EXPECT_FLOAT_EQ(param_1[i], !mask ? param_3[i] : sincos1((typename Vector16ps::value_type)param_2[i], (typename Vector16ps::value_type)param_3[i], param_4 >>  i , (typename Vector16ps::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
         }
     }
 }
@@ -999,12 +1009,14 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_sincos_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sincos((typename Vector8pd::value_type)param_2[i], (typename Vector8pd::value_type)param_3[i], param_4 >>  i , (typename Vector8pd::value_type)param_5[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],sincos((typename Vector8pd::value_type)param_2[i], (typename Vector8pd::value_type)param_3[i], param_4 >>  i , (typename Vector8pd::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
+            const auto mask = (param_4 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_2[i] : sincos((typename Vector8pd::value_type)param_2[i], (typename Vector8pd::value_type)param_3[i], param_4 >>  i , (typename Vector8pd::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
         }
         if(std::isnan(param_1[i]))
             EXPECT_TRUE(std::isnan(sincos1((typename Vector8pd::value_type)param_2[i], (typename Vector8pd::value_type)param_3[i], param_4 >>  i , (typename Vector8pd::value_type)param_5[i])));
         else {
-            EXPECT_DOUBLE_EQ(param_1[i],sincos1((typename Vector8pd::value_type)param_2[i], (typename Vector8pd::value_type)param_3[i], param_4 >>  i , (typename Vector8pd::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
+            const auto mask = (param_4 >> i) & 1;
+        EXPECT_DOUBLE_EQ(param_1[i], !mask ? param_3[i] : sincos1((typename Vector8pd::value_type)param_2[i], (typename Vector8pd::value_type)param_3[i], param_4 >>  i , (typename Vector8pd::value_type)param_5[i])) << "Input:"  << ";" <<param_2[i] << ";" <<param_3[i] << ";" << ((param_4>> i) & 1) << ";" <<param_5[i];
         }
     }
 }
@@ -1068,7 +1080,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_tan_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(tan((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],tan((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : tan((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1132,7 +1145,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_tan_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(tan((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],tan((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : tan((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1196,7 +1210,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_asin_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(asin((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],asin((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : asin((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1260,7 +1275,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_asin_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(asin((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],asin((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : asin((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1324,7 +1340,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_acos_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(acos((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],acos((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : acos((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1388,7 +1405,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_acos_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(acos((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],acos((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : acos((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1452,7 +1470,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_atan_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(atan((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],atan((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : atan((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1516,7 +1535,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_atan_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(atan((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],atan((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : atan((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1586,7 +1606,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_atan2_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(atan2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],atan2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : atan2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -1656,7 +1677,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_atan2_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(atan2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],atan2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : atan2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -1720,7 +1742,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_sind_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sind((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],sind((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : sind((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1784,7 +1807,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_sind_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sind((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],sind((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : sind((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1848,7 +1872,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cosd_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cosd((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],cosd((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : cosd((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1912,7 +1937,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cosd_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cosd((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],cosd((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : cosd((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -1976,7 +2002,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_tand_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(tand((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],tand((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : tand((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2040,7 +2067,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_tand_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(tand((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],tand((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : tand((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2104,7 +2132,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_sinh_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sinh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],sinh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : sinh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2168,7 +2197,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_sinh_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(sinh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],sinh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : sinh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2232,7 +2262,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cosh_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cosh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],cosh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : cosh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2296,7 +2327,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cosh_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cosh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],cosh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : cosh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2360,7 +2392,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_tanh_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(tanh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],tanh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : tanh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2424,7 +2457,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_tanh_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(tanh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],tanh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : tanh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2488,7 +2522,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_asinh_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(asinh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],asinh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : asinh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2552,7 +2587,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_asinh_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(asinh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],asinh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : asinh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2616,7 +2652,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_acosh_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(acosh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],acosh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : acosh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2680,7 +2717,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_acosh_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(acosh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],acosh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : acosh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2744,7 +2782,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_atanh_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(atanh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],atanh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : atanh((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2808,7 +2847,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_atanh_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(atanh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],atanh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : atanh((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2872,7 +2912,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_log_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],log((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : log((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -2936,7 +2977,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_log_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],log((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : log((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3000,7 +3042,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_log1p_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log1p((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],log1p((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : log1p((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3064,7 +3107,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_log1p_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log1p((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],log1p((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : log1p((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3128,7 +3172,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_log10_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log10((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],log10((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : log10((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3192,7 +3237,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_log10_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log10((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],log10((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : log10((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3256,7 +3302,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_log2_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],log2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : log2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3320,7 +3367,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_log2_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(log2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],log2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : log2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3384,7 +3432,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_logb_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(logb((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],logb((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : logb((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3448,7 +3497,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_logb_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(logb((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],logb((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : logb((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3512,7 +3562,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_exp_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(exp((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],exp((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : exp((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3576,7 +3627,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_exp_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(exp((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],exp((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : exp((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3640,7 +3692,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_exp10_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(exp10((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],exp10((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : exp10((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3704,7 +3757,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_exp10_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(exp10((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],exp10((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : exp10((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3768,7 +3822,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_exp2_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(exp2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],exp2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : exp2((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3832,7 +3887,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_exp2_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(exp2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],exp2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : exp2((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3896,7 +3952,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_expm1_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(expm1((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],expm1((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : expm1((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -3960,7 +4017,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_expm1_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(expm1((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],expm1((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : expm1((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -4030,7 +4088,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_pow_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(pow((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],pow((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : pow((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -4100,7 +4159,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_pow_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(pow((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],pow((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : pow((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -4164,7 +4224,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_trunc_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(trunc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],trunc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : trunc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -4228,263 +4289,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_trunc_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(trunc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],trunc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_floor_ps(Vector16ps &ret, const Vector16ps &param_0)
-{
-    __m512 impl_param_0 = _mm512_load_ps(param_0.data());
-
-    __m512 m_ret = _mm512_floor_ps(impl_param_0);
-
-    _mm512_store_ps(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512, test_mm512_floor_ps) {
-    Vector16ps Result;
-    Vector16ps param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector16ps::value_type)rd_fp(); });
-
-    helper__mm512_floor_ps(Result, param_1);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(floor((typename Vector16ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],floor((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_mask_floor_ps(Vector16ps &ret, const Vector16ps &param_0, const std::int16_t  &param_1, const Vector16ps &param_2)
-{
-    __m512 impl_param_0 = _mm512_load_ps(param_0.data());
-    __mmask16 impl_param_1 = ((__mmask16)(param_1));
-    __m512 impl_param_2 = _mm512_load_ps(param_2.data());
-
-    __m512 m_ret = _mm512_mask_floor_ps(impl_param_0, impl_param_1, impl_param_2);
-
-    _mm512_store_ps(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512, test_mm512_mask_floor_ps) {
-    Vector16ps Result;
-    Vector16ps param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector16ps::value_type)rd_fp(); });
-    std::int16_t  param_2;
-    param_2 = (std::int16_t) mt64();
-    Vector16ps param_3;
-    std::generate(param_3.begin(),param_3.end(), []() { return (typename Vector16ps::value_type)rd_fp(); });
-
-    helper__mm512_mask_floor_ps(Result, param_1, param_2, param_3);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(floor((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],floor((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_floor_pd(Vector8pd &ret, const Vector8pd &param_0)
-{
-    __m512d impl_param_0 = _mm512_load_pd(param_0.data());
-
-    __m512d m_ret = _mm512_floor_pd(impl_param_0);
-
-    _mm512_store_pd(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512d, test_mm512_floor_pd) {
-    Vector8pd Result;
-    Vector8pd param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector8pd::value_type)rd_fp(); });
-
-    helper__mm512_floor_pd(Result, param_1);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(floor((typename Vector8pd::value_type)param_1[i])));
-        else {
-            EXPECT_DOUBLE_EQ(Result[i],floor((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_mask_floor_pd(Vector8pd &ret, const Vector8pd &param_0, const std::int8_t  &param_1, const Vector8pd &param_2)
-{
-    __m512d impl_param_0 = _mm512_load_pd(param_0.data());
-    __mmask8 impl_param_1 = ((__mmask8)(param_1));
-    __m512d impl_param_2 = _mm512_load_pd(param_2.data());
-
-    __m512d m_ret = _mm512_mask_floor_pd(impl_param_0, impl_param_1, impl_param_2);
-
-    _mm512_store_pd(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512d, test_mm512_mask_floor_pd) {
-    Vector8pd Result;
-    Vector8pd param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector8pd::value_type)rd_fp(); });
-    std::int8_t  param_2;
-    param_2 = (std::int8_t) mt64();
-    Vector8pd param_3;
-    std::generate(param_3.begin(),param_3.end(), []() { return (typename Vector8pd::value_type)rd_fp(); });
-
-    helper__mm512_mask_floor_pd(Result, param_1, param_2, param_3);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(floor((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
-        else {
-            EXPECT_DOUBLE_EQ(Result[i],floor((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_ceil_ps(Vector16ps &ret, const Vector16ps &param_0)
-{
-    __m512 impl_param_0 = _mm512_load_ps(param_0.data());
-
-    __m512 m_ret = _mm512_ceil_ps(impl_param_0);
-
-    _mm512_store_ps(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512, test_mm512_ceil_ps) {
-    Vector16ps Result;
-    Vector16ps param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector16ps::value_type)rd_fp(); });
-
-    helper__mm512_ceil_ps(Result, param_1);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(ceil((typename Vector16ps::value_type)param_1[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],ceil((typename Vector16ps::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_mask_ceil_ps(Vector16ps &ret, const Vector16ps &param_0, const std::int16_t  &param_1, const Vector16ps &param_2)
-{
-    __m512 impl_param_0 = _mm512_load_ps(param_0.data());
-    __mmask16 impl_param_1 = ((__mmask16)(param_1));
-    __m512 impl_param_2 = _mm512_load_ps(param_2.data());
-
-    __m512 m_ret = _mm512_mask_ceil_ps(impl_param_0, impl_param_1, impl_param_2);
-
-    _mm512_store_ps(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512, test_mm512_mask_ceil_ps) {
-    Vector16ps Result;
-    Vector16ps param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector16ps::value_type)rd_fp(); });
-    std::int16_t  param_2;
-    param_2 = (std::int16_t) mt64();
-    Vector16ps param_3;
-    std::generate(param_3.begin(),param_3.end(), []() { return (typename Vector16ps::value_type)rd_fp(); });
-
-    helper__mm512_mask_ceil_ps(Result, param_1, param_2, param_3);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(ceil((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
-        else {
-            EXPECT_FLOAT_EQ(Result[i],ceil((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_ceil_pd(Vector8pd &ret, const Vector8pd &param_0)
-{
-    __m512d impl_param_0 = _mm512_load_pd(param_0.data());
-
-    __m512d m_ret = _mm512_ceil_pd(impl_param_0);
-
-    _mm512_store_pd(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512d, test_mm512_ceil_pd) {
-    Vector8pd Result;
-    Vector8pd param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector8pd::value_type)rd_fp(); });
-
-    helper__mm512_ceil_pd(Result, param_1);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(ceil((typename Vector8pd::value_type)param_1[i])));
-        else {
-            EXPECT_DOUBLE_EQ(Result[i],ceil((typename Vector8pd::value_type)param_1[i])) << "Input:"  << ";" <<param_1[i];
-        }
-    }
-}
-
-
-
-
-__declspec(noinline) void helper__mm512_mask_ceil_pd(Vector8pd &ret, const Vector8pd &param_0, const std::int8_t  &param_1, const Vector8pd &param_2)
-{
-    __m512d impl_param_0 = _mm512_load_pd(param_0.data());
-    __mmask8 impl_param_1 = ((__mmask8)(param_1));
-    __m512d impl_param_2 = _mm512_load_pd(param_2.data());
-
-    __m512d m_ret = _mm512_mask_ceil_pd(impl_param_0, impl_param_1, impl_param_2);
-
-    _mm512_store_pd(ret.data(), m_ret);
-
-}
-
-TEST(SVML_intrinsics__m512d, test_mm512_mask_ceil_pd) {
-    Vector8pd Result;
-    Vector8pd param_1;
-    std::generate(param_1.begin(),param_1.end(), []() { return (typename Vector8pd::value_type)rd_fp(); });
-    std::int8_t  param_2;
-    param_2 = (std::int8_t) mt64();
-    Vector8pd param_3;
-    std::generate(param_3.begin(),param_3.end(), []() { return (typename Vector8pd::value_type)rd_fp(); });
-
-    helper__mm512_mask_ceil_pd(Result, param_1, param_2, param_3);
-
-    for(int i = 0; i < Result.size(); i++) {
-        if(std::isnan(Result[i]))
-            EXPECT_TRUE(std::isnan(ceil((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
-        else {
-            EXPECT_DOUBLE_EQ(Result[i],ceil((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : trunc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -4548,7 +4354,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_svml_round_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(round((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],round((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : round((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -4612,7 +4419,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_svml_round_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(round((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],round((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : round((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -4682,7 +4490,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_fmod_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(fmod((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],fmod((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : fmod((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -4752,7 +4561,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_fmod_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(fmod((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],fmod((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : fmod((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -4816,7 +4626,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_rint_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(rint((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],rint((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : rint((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -4880,7 +4691,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_rint_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(rint((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],rint((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : rint((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -4944,7 +4756,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_invsqrt_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(1/sqrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/sqrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : 1/sqrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5008,7 +4821,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_invsqrt_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(1/sqrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/sqrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : 1/sqrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5072,7 +4886,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cbrt_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cbrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],cbrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : cbrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5136,7 +4951,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cbrt_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cbrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],cbrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : cbrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5200,7 +5016,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_invcbrt_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(1/cbrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],1/cbrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : 1/cbrt((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5264,7 +5081,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_invcbrt_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(1/cbrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],1/cbrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : 1/cbrt((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5334,7 +5152,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_hypot_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(hypot((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],hypot((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : hypot((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i], (typename Vector16ps::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -5404,7 +5223,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_hypot_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(hypot((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],hypot((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : hypot((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i], (typename Vector8pd::value_type)param_4[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i] << ";" <<param_4[i];
         }
     }
 }
@@ -5468,7 +5288,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cdfnorm_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cdfnorm((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],cdfnorm((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : cdfnorm((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5532,7 +5353,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cdfnorm_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cdfnorm((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],cdfnorm((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : cdfnorm((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5596,7 +5418,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_cdfnorminv_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cdfnorminv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],cdfnorminv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : cdfnorminv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5660,7 +5483,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_cdfnorminv_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(cdfnorminv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],cdfnorminv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : cdfnorminv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5724,7 +5548,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erf_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erf((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],erf((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : erf((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5788,7 +5613,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erf_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erf((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],erf((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : erf((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5852,7 +5678,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erfc_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erfc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],erfc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : erfc((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5916,7 +5743,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erfc_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erfc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],erfc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : erfc((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -5980,7 +5808,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erfcinv_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erfcinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],erfcinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : erfcinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6044,7 +5873,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erfcinv_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erfcinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],erfcinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : erfcinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6108,7 +5938,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_erfinv_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erfinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],erfinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : erfinv((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6172,7 +6003,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_erfinv_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(erfinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],erfinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : erfinv((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6236,7 +6068,8 @@ TEST(SVML_intrinsics__m512, test_mm512_mask_nearbyint_ps) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(nearbyint((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])));
         else {
-            EXPECT_FLOAT_EQ(Result[i],nearbyint((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_FLOAT_EQ(Result[i], !mask ? param_1[i] : nearbyint((typename Vector16ps::value_type)param_1[i], param_2 >>  i , (typename Vector16ps::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
@@ -6300,7 +6133,8 @@ TEST(SVML_intrinsics__m512d, test_mm512_mask_nearbyint_pd) {
         if(std::isnan(Result[i]))
             EXPECT_TRUE(std::isnan(nearbyint((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])));
         else {
-            EXPECT_DOUBLE_EQ(Result[i],nearbyint((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
+            const auto mask = (param_2 >> i) & 1;
+        EXPECT_DOUBLE_EQ(Result[i], !mask ? param_1[i] : nearbyint((typename Vector8pd::value_type)param_1[i], param_2 >>  i , (typename Vector8pd::value_type)param_3[i])) << "Input:"  << ";" <<param_1[i] << ";" << ((param_2>> i) & 1) << ";" <<param_3[i];
         }
     }
 }
